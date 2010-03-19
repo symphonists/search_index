@@ -15,13 +15,11 @@
 		
 		public function about(){
 			return array(
-					 'name' => 'Search',
+					 'name' => 'Search Index',
 					 'author' => array(
 							'name' => 'Nick Dunn',
-							'website' => 'http://symphony-demo',
-							'email' => 'nick.dunn@airlock.com'),
-					 'version' => '1.0',
-					 'release-date' => '2009-11-12T08:14:58+00:00');	
+							'website' => 'http://nick-dunn.co.uk')
+						);	
 		}
 		
 		public function getSource(){
