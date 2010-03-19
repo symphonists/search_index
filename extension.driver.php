@@ -17,20 +17,39 @@
 		}
 		
 		public function install(){
-			return $this->_Parent->Database->query(
-				"CREATE TABLE `tbl_search_index` (
-				  `id` int(11) NOT NULL auto_increment,
-				  `entry_id` int(11) NOT NULL,
-				  `section_id` int(11) NOT NULL,
-				  `data` text,
-				  PRIMARY KEY (`id`),
-				  FULLTEXT KEY `data` (`data`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8"
-			);
+			try{
+				Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_fields_search_index` (
+					  `id` int(11) unsigned NOT NULL auto_increment,
+					  `field_id` int(11) unsigned NOT NULL,
+				  PRIMARY KEY  (`id`),
+				  KEY `field_id` (`field_id`))");
+				Symphony::Database()->query(
+					"CREATE TABLE `tbl_search_index` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `entry_id` int(11) NOT NULL,
+					  `section_id` int(11) NOT NULL,
+					  `data` text,
+					  PRIMARY KEY (`id`),
+					  FULLTEXT KEY `data` (`data`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
+				);
+			}
+			catch(Exception $e){
+				return false;
+			}
+			
+			return true;
 		}
 		
 		public function uninstall(){
-			Symphony::Database()->query("DROP TABLE `tbl_search_index`");
+			try{
+				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
+				Symphony::Database()->query("DROP TABLE `tbl_fields_search_index`");
+			}
+			catch(Exception $e){
+				return false;
+			}
+			return true;
 		}
 				
 		public function getSubscribedDelegates() {
