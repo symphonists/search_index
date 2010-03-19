@@ -15,7 +15,7 @@
 		
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=null) {	
 			$status = self::__OK__;			
-			return array('test' => 'test');
+			return array('value' => '');
 		}
 		
 		function commit(){
@@ -41,6 +41,9 @@
 			$wrapper->appendChild($label);
 		}
 		
+		public function fetchIncludableElements(){
+			return false;
+		}
 		public function appendFormattedElement(&$wrapper, $data, $encode=false, $mode=NULL, $entry_id=NULL) {
 			// nothing to see here
 		}
