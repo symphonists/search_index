@@ -13,6 +13,10 @@
 			return true;
 		}
 		
+		public function fetchIncludableElements(){
+			return false;
+		}
+		
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=null) {	
 			$status = self::__OK__;			
 			return array('value' => '');
@@ -39,13 +43,6 @@
 			$label = Widget::Label('Value');
 			$label->appendChild(Widget::Input('fields[filter]'.($fieldnamePrefix ? '['.$fieldnamePrefix.']' : '').'['.$this->get('id').']'.($fieldnamePostfix ? '['.$fieldnamePostfix.']' : ''), ($data ? General::sanitize($data) : NULL)));	
 			$wrapper->appendChild($label);
-		}
-		
-		public function fetchIncludableElements(){
-			return false;
-		}
-		public function appendFormattedElement(&$wrapper, $data, $encode=false, $mode=NULL, $entry_id=NULL) {
-			// nothing to see here
 		}
 				
 		public function createTable(){
