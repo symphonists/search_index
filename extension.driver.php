@@ -142,10 +142,9 @@
 					if(!is_array($filter)){
 						$filter_type = $this->__determineFilterType($filter);
 
-						$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : '(?<!\\\\),').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
+						$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : ',').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
 						$value = array_map('trim', $value);
 
-						$value = array_map(array('Datasource', 'removeEscapedCommas'), $value);
 					}
 
 					else $value = $filter;
@@ -154,7 +153,7 @@
 					$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false));
 
 				}
-			}
+			}			
 			
 			$entry_prefilter = $entryManager->fetch($entry->get('id'), $section->get('id'), 1, 0, $where, $joins);
 			
