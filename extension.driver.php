@@ -18,15 +18,20 @@
 		
 		public function install(){
 			return $this->_Parent->Database->query(
-				"CREATE TABLE `sym_search_index` (
+				"CREATE TABLE `tbl_search_index` (
 				  `id` int(11) NOT NULL auto_increment,
 				  `entry_id` int(11) NOT NULL,
+				  `section_id` int(11) NOT NULL,
 				  `data` text,
 				  PRIMARY KEY (`id`),
 				  FULLTEXT KEY `data` (`data`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8"
 			);
-		}		
+		}
+		
+		public function uninstall(){
+			Symphony::Database()->query("DROP TABLE `tbl_search_index`");
+		}
 				
 		public function getSubscribedDelegates() {
 			return array(
@@ -48,34 +53,41 @@
 			);
 		}
 		
-		/*public function fetchNavigation() {
+		public function fetchNavigation() {
 			return array(
 				array(
 					'location'	=> 'Blueprints',
-					'name'		=> 'XML Importers',
-					'link'		=> '/importers/'
+					'name'		=> 'Search Indexes',
+					'link'		=> '/indexes/'
 				),
 			);
-		}*/
+		}
 		
-		public function getIndexedSections() {
-			$sections = array();
-			
-			// TODO: these should be built from within the UI
-			//$section[id]['fields'] = array('handle1', 'handle2');
-			//$section[id]['filters'] = array('id' => 'filter');
-			
-			$sections[2]['fields'] = array('title', 'content');
-			$sections[2]['filters'] = array(
-				'19' => 'yes'
-			);
-			
-			return $sections;
-			
+		public function getIndexes() {
+			$indexes = Symphony::Configuration()->get('indexes', 'search_index');
+			return unserialize($indexes);			
+		}
+		
+		public function setIndexes($indexes) {
+			Symphony::Configuration()->set('indexes', serialize($indexes), 'search_index');
+			$this->_Parent->saveConfig();
 		}
 		
 		private function __determineFilterType($value){
 			return (false === strpos($value, '+') ? DS_FILTER_OR : DS_FILTER_AND);
+		}
+		
+		public function rebuildIndex($section) {
+			$entryManager = new EntryManager(Administration::instance());
+			$entries = $entryManager->fetch(NULL, $section->get('id'));
+			
+			$context = array();
+			$context['section'] = $section;
+			
+			foreach($entries as $entry) {
+				$context['entry'] = $entry;
+				$this->saveEntry($context);
+			}
 		}
 		
 		public function saveEntry($context) {
@@ -83,7 +95,7 @@
 			$entry = $context['entry'];
 			
 			// get a list of sections that have indexing enabled
-			$indexed_sections = $this->getIndexedSections();
+			$indexed_sections = $this->getIndexes();
 			
 			// go no further if this section isn't being indexed
 			if (!isset($indexed_sections[$section->get('id')])) return;
@@ -166,10 +178,11 @@
 			Symphony::Database()->insert(
 				array(
 					'entry_id' => $entry->get('id'),
+					'section_id' => $section->get('id'),
 					'data' => $data
 				),
 				'tbl_search_index'
-			);	
+			);
 			
 		}
 		
@@ -179,6 +192,16 @@
 				sprintf(
 					"DELETE FROM `tbl_search_index` WHERE `entry_id` = %d",
 					$context['entry_id']
+				)
+			);
+		}
+		
+		public function deleteEntriesBySection($section) {			
+			// delete existing cached text
+			Symphony::Database()->query(
+				sprintf(
+					"DELETE FROM `tbl_search_index` WHERE `section_id` = %d",
+					$section->get('id')
 				)
 			);
 		}
