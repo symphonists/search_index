@@ -1,0 +1,12 @@
+span.re-index {
+	background: url(spinner.gif) 100% 50% no-repeat;
+	padding-right: 25px;
+}
+
+td.count-column {
+	width: 50%;
+}
+
+span#search-index-config {
+	display: none;
+}
