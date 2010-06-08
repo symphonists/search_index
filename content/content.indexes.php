@@ -1,24 +1,27 @@
 <?php
 	
-	require_once(TOOLKIT . '/class.gateway.php');
 	require_once(TOOLKIT . '/class.administrationpage.php');
 	require_once(TOOLKIT . '/class.sectionmanager.php');
 	require_once(TOOLKIT . '/class.entrymanager.php');
 	
+	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
+	require_once(EXTENSIONS . '/search_index/lib/class.entry_xml_datasource.php');
+	require_once(EXTENSIONS . '/search_index/lib/class.reindex_datasource.php');
+	
 	class contentExtensionSearch_IndexIndexes extends AdministrationPage {
 		protected $_driver = null;
 		protected $_errors = array();
+		protected $_labels = array();
 		
 		public function __construct(&$parent){
 			parent::__construct($parent);
 			
 			$this->_uri = URL . '/symphony/extension/search_index';
-			$this->_driver = $this->_Parent->ExtensionManager->create('search_index');
 			
 			$sectionManager = new SectionManager($this->_Parent);			
 			$this->_sections = $sectionManager->fetch(NULL, 'ASC', 'name');
 			
-			$this->_indexes = $this->_driver->getIndexes();
+			$this->_indexes = SearchIndex::getIndexes();
 			
 			$this->_section = null;
 			$this->_index = null;
@@ -50,29 +53,25 @@
 				switch ($_POST['with-selected']) {
 					case 'delete':
 						foreach ($checked as $section_id) {
-							// set context for this section
+							
 							$this->__setContext($section_id);
-							// ignore if not index is set for a selected section
+							
+							// ignore if no index is set for a selected section
 							if (is_null($this->_index)) continue;
 							
-							$this->_driver->deleteEntriesBySection($this->_section);
+							SearchIndex::deleteIndexBySection($section_id);							
 							unset($this->_indexes[$section_id]);
-							$this->_driver->setIndexes($this->_indexes);
+							SearchIndex::saveIndexes($this->_indexes);
+							
 						}						
 						redirect("{$this->_uri}/indexes/");
 						break;
 						
 					case 're-index':
-						
-						foreach ($checked as $section_id) {							
-							// set context for this section
-							// ignore if not index is set for a selected section
-							$this->__setContext($section_id);							
-							if (is_null($this->_index)) continue;							
-							$this->_driver->rebuildIndex($this->_section);
+						foreach ($checked as $section_id) {
+							SearchIndex::deleteIndexBySection($section_id);
 						}
-						
-						redirect("{$this->_uri}/indexes/");
+						redirect("{$this->_uri}/indexes/?section=" . join(',', $checked));
 						break;
 				}
 			}
@@ -95,10 +94,7 @@
 			}
 			$this->_indexes[$this->_section->get('id')]['filters'] = $filters;
 			
-			$this->_driver->setIndexes($this->_indexes);
-			
-			// kick-start index when creating a new index
-			if (!$is_new) $this->_driver->rebuildIndex($this->_section);
+			SearchIndex::saveIndexes($this->_indexes);
 			
 			redirect("{$this->_uri}/indexes/");
 		}
@@ -232,11 +228,14 @@
 			
 			$this->appendSubheading(__('Search Indexes'));
 			
+			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
+			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
+			
 			$tableHead = array();
 			$tableBody = array();
 			
 			$tableHead[] = array('Section', 'col');
-			$tableHead[] = array('Indexed Entries', 'col');
+			$tableHead[] = array('Index', 'col');
 			
 			if (!is_array($this->_sections) or empty($this->_sections)) {
 				$tableBody = array(
@@ -245,6 +244,9 @@
 			}
 			
 			else {
+				
+				$re_index = explode(',', $_GET['section']);
+				
 				foreach ($this->_sections as $section) {
 					
 					$col_name = Widget::TableData(
@@ -253,9 +255,18 @@
 							"{$this->_uri}/indexes/edit/{$section->get('id')}/"
 						)
 					);
-					$col_name->appendChild(Widget::Input("items[{$section->get('id')}]", null, 'checkbox'));
 					
 					if (isset($this->_indexes[$section->get('id')])) {
+						$col_name->appendChild(Widget::Input("items[{$section->get('id')}]", null, 'checkbox'));
+					}
+					
+					$count_data = null;
+					$count_class = null;
+					
+					if (isset($_GET['section']) && in_array($section->get('id'), $re_index) && in_array($section->get('id'), array_keys($this->_indexes))) {
+						$count_data = '<span class="to-re-index" id="section-'.$section->get('id').'">Waiting to re-index...</span>';
+					}
+					else if (isset($this->_indexes[$section->get('id')])) {
 						$count = Symphony::Database()->fetchCol(
 							'count',
 							sprintf(
@@ -263,12 +274,16 @@
 								$section->get('id')
 							)
 						);
-						$col_count = Widget::TableData($count[0] . ' ' . (((int)$count[0] == 1) ? __('entry') : __('entries')));
-					} else {
-						$col_count = Widget::TableData('No index', 'inactive');
+						$count_data = $count[0] . ' ' . (((int)$count[0] == 1) ? __('entry') : __('entries'));
+					}
+					else {
+						$count_data = 'No index';
+						$count_class = 'inactive';
 					}
 					
-					$tableBody[] = Widget::TableRow(array($col_name, $col_count), null);
+					$col_count = Widget::TableData($count_data, $count_class . ' count-column');
+					
+					$tableBody[] = Widget::TableRow(array($col_name, $col_count), 'section-' . $section->get('id'));
 
 				}
 			}
@@ -280,13 +295,27 @@
 			
 			$this->Form->appendChild($table);
 			
+			$config = new XMLElement(
+				'span',
+				json_encode(
+					array_merge(
+						$this->_Parent->Configuration->get('search_index'),
+						array(
+							'extension_root_url' => $this->_uri
+						)
+					)
+				),
+				array('id' => 'search-index-config')
+			);
+			$this->Form->appendChild($config);
+			
 			$actions = new XMLElement('div');
 			$actions->setAttribute('class', 'actions');
 			
 			$options = array(
 				array(null, false, 'With Selected...'),
-				array('delete', false, 'Delete index'),
-				array('re-index', false, 'Re-index')
+				array('delete', false, 'Delete'),
+				array('re-index', false, 'Re-index Entries')
 			);
 			
 			$actions->appendChild(Widget::Select('with-selected', $options));

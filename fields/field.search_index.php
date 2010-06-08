@@ -1,5 +1,7 @@
 <?php
 	
+	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
+	
 	Class fieldSearch_Index extends Field{	
 		
 		function __construct(&$parent){
@@ -46,9 +48,7 @@
 		}
 				
 		public function createTable(){
-			
-			return $this->Database->query(
-			
+			return $this->Database->query(			
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `entry_id` int(11) unsigned NOT NULL,
@@ -56,8 +56,7 @@
 				  PRIMARY KEY  (`id`),
 				  KEY `entry_id` (`entry_id`),
 				  KEY `value` (`value`)
-				) TYPE=MyISAM;"
-			
+				) TYPE=MyISAM;"			
 			);
 		}
 		
@@ -67,20 +66,14 @@
 			if (!is_array($data)) $data = array($data);
 			
 			foreach ($data as &$value) {
-				$value = $this->cleanValue($value);
+				$value = SearchIndex::wildcardSearchKeywords($this->cleanValue($value));
 			}
 			
-			// TODO: andOperation?
 			$this->_key++;
 			$data = implode("', '", $data);
-			$joins .= "
-				LEFT JOIN
-					`tbl_search_index` AS search_index
-					ON (e.id = search_index.entry_id)
-			";			
-			$where .= "
-				AND MATCH(search_index.data) AGAINST ('{$data}' IN BOOLEAN MODE)
-			";
+			
+			$joins .= " LEFT JOIN `tbl_search_index` AS search_index ON (e.id = search_index.entry_id) ";			
+			$where .= " AND MATCH(search_index.data) AGAINST ('{$data}' IN BOOLEAN MODE) ";
 			
 			return true;
 			
