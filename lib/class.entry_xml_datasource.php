@@ -3,15 +3,15 @@
 Class EntryXMLDataSource extends Datasource{
 	
 	public $dsParamROOTELEMENT = 'entries';
-	public $dsSource = null;
+	public $dsSource = NULL;
 	
 	public $dsParamORDER = 'desc';
 	public $dsParamLIMIT = '1';
 	public $dsParamREDIRECTONEMPTY = 'no';
 	public $dsParamSORT = 'system:id';
-	public $dsParamSTARTPAGE = '1';		
+	public $dsParamSTARTPAGE = '1';
 	
-	public function __construct(&$parent, $env=NULL, $process_params=true){
+	public function __construct(&$parent, $env=NULL, $process_params=TRUE){
 		parent::__construct($parent, $env, $process_params);
 	}
 	

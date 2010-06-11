@@ -3,7 +3,7 @@
 Class ReindexDataSource extends Datasource{
 	
 	public $dsParamROOTELEMENT = 'reindex';
-	public $dsSource = null;
+	public $dsSource = NULL;
 	
 	public $dsParamORDER = 'asc';
 	public $dsParamLIMIT = '20';
@@ -14,7 +14,7 @@ Class ReindexDataSource extends Datasource{
 	public $dsParamINCLUDEDELEMENTS = array('system:pagination');
 	public $dsParamASSOCIATEDENTRYCOUNTS = 'no';		
 	
-	public function __construct(&$parent, $env=NULL, $process_params=true){
+	public function __construct(&$parent, $env=NULL, $process_params=TRUE){
 		parent::__construct($parent, $env, $process_params);
 	}
 	

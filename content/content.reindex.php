@@ -7,28 +7,32 @@
 	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
 	
 	class contentExtensionSearch_IndexReindex extends AdministrationPage {
-		protected $_errors = array();
 		
 		public function __construct(&$parent){
 			parent::__construct($parent);
 			
-			$this->_uri = URL . '/symphony/extension/search_index';
-			
 			$sectionManager = new SectionManager(Administration::instance());
 			$this->_entryManager = new EntryManager(Administration::instance());
-				
+			
+			// cache array of all sections
 			$this->_sections = $sectionManager->fetch(NULL, 'ASC', 'name');
 			$this->_section = null;
 			
+			// cache array of all indexes
 			$this->_indexes = SearchIndex::getIndexes();
 			$this->_index = null;
 		}
 		
 		public function build($context) {
-			$this->__setContext($_GET['section']);
+			$this->__setContext((int)$_GET['section']);
 			parent::build($context);
 		}
 		
+		/**
+		* Sets the context of the page to the desired index (indexed by section ID)
+		*
+		* @param int $section_id
+		*/
 		private function __setContext($section_id) {
 			$this->_index = $this->_indexes[$section_id];
 			foreach($this->_sections as $s) {
@@ -39,7 +43,7 @@
 		public function __viewIndex() {
 			
 			// create a DS and filter on System ID of the current entry to build the entry's XML			
-			$ds = new ReindexDataSource(Administration::instance(), null, false);
+			$ds = new ReindexDataSource(Administration::instance(), NULL, FALSE);
 			$ds->dsSource = (string)$_GET['section'];
 			$ds->dsParamFILTERS = $this->_index['filters'];
 			
@@ -57,7 +61,6 @@
 					'section' => $this->_section,
 					'entry' => reset($this->_entryManager->fetch($entry->getAttribute('id')))
 				);
-				// TODO: move to SearchIndex from driver!!
 				SearchIndex::indexEntry($context->entry, $context->section);
 			}
 			

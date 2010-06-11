@@ -9,9 +9,7 @@
 	require_once(EXTENSIONS . '/search_index/lib/class.reindex_datasource.php');
 	
 	class contentExtensionSearch_IndexIndexes extends AdministrationPage {
-		protected $_driver = null;
 		protected $_errors = array();
-		protected $_labels = array();
 		
 		public function __construct(&$parent){
 			parent::__construct($parent);
@@ -23,8 +21,8 @@
 			
 			$this->_indexes = SearchIndex::getIndexes();
 			
-			$this->_section = null;
-			$this->_index = null;
+			$this->_section = NULL;
+			$this->_index = NULL;
 		}
 		
 		public function build($context) {

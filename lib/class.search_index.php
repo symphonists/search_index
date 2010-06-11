@@ -2,13 +2,13 @@
 
 Class SearchIndex {
 	
-	private static $_entry_manager = null;
+	private static $_entry_manager = NULL;
 	
 	/**
 	* Set up static members
 	*/
 	private function assert() {
-		if (self::$_entry_manager == null) self::$_entry_manager = new EntryManager(Administration::instance());
+		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(Administration::instance());
 	}
 	
 	/**
@@ -19,11 +19,22 @@ Class SearchIndex {
 		return unserialize($indexes);			
 	}
 	
+	/**
+	* Save all index configurations to config
+	*
+	* @param array $indexes
+	*/
 	public static function saveIndexes($indexes) {
 		Symphony::Configuration()->set('indexes', serialize($indexes), 'search_index');
 		Administration::instance()->saveConfig();
 	}
 	
+	/**
+	* Parse the indexable content for an entry
+	*
+	* @param int $entry
+	* @param int $section
+	*/
 	public function indexEntry($entry, $section) {
 		self::assert();
 		
@@ -59,7 +70,7 @@ Class SearchIndex {
 				}
 
 				$field = self::$_entry_manager->fieldManager->fetch($field_id);
-				$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false));
+				$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? TRUE : FALSE));
 
 			}
 		}			
@@ -75,7 +86,7 @@ Class SearchIndex {
 		$entry = $entry['id'];
 		
 		// create a DS and filter on System ID of the current entry to build the entry's XML			
-		$ds = new EntryXMLDataSource(Administration::instance(), null, false);
+		$ds = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
 		$ds->dsParamINCLUDEDELEMENTS = $indexed_sections[$section]['fields'];
 		$ds->dsParamFILTERS['id'] = $entry;
 		$ds->dsSource = (string)$section;
@@ -93,6 +104,13 @@ Class SearchIndex {
 		self::saveEntryIndex($entry, $section, $data);
 	}
 	
+	/**
+	* Store the indexable content for an entry
+	*
+	* @param int $entry
+	* @param int $section
+	* @param string $data
+	*/
 	public function saveEntryIndex($entry_id, $section_id, $data) {
 		Symphony::Database()->insert(
 			array(
@@ -104,6 +122,11 @@ Class SearchIndex {
 		);
 	}
 	
+	/**
+	* Delete indexed entry data for a section
+	*
+	* @param int $section_id
+	*/
 	public function deleteIndexBySection($section_id) {
 		Symphony::Database()->query(
 			sprintf(
@@ -113,6 +136,11 @@ Class SearchIndex {
 		);
 	}
 	
+	/**
+	* Delete indexed entry data for an entry
+	*
+	* @param int $entry_id
+	*/
 	public function deleteIndexByEntry($entry_id) {			
 		Symphony::Database()->query(
 			sprintf(
@@ -122,6 +150,11 @@ Class SearchIndex {
 		);
 	}
 	
+	/**
+	* Append wildcard character to the words of a search string
+	*
+	* @param string $string
+	*/
 	public function wildcardSearchKeywords($string) {
 		if (Symphony::Configuration()->get('append-wildcard', 'search_index') != 'yes') return $string;
 		
