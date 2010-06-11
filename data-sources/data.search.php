@@ -15,19 +15,20 @@
 		
 		public function about(){
 			return array(
-					 'name' => 'Search Index',
-					 'author' => array(
+					'name' => 'Search Index',
+					'author' => array(
 							'name' => 'Nick Dunn',
-							'website' => 'http://nick-dunn.co.uk')
-						);	
+							'website' => 'http://nick-dunn.co.uk'
+						)
+					);	
 		}
 		
 		public function getSource(){
-			return null;
+			return NULL;
 		}
 		
 		public function allowEditorToParse(){
-			return false;
+			return FALSE;
 		}
 		
 		private function errorXML($message) {
@@ -41,6 +42,7 @@
 			$param_output = array();
 			
 			$get = $_GET;
+			// look for key in GET array if it's specified
 			if (Symphony::Configuration()->get('get-param-prefix', 'search_index') != '') {
 				$get = $get[Symphony::Configuration()->get('get-param-prefix', 'search_index')];
 			}
@@ -61,6 +63,7 @@
 			$this->dsParamSTARTPAGE = isset($get[$param_page]) ? (int)$get[$param_page] : $this->dsParamSTARTPAGE;
 			
 			if (is_null($sections)) {
+				
 				return $this->errorXML('Invalid search sections');
 				
 			} else {
@@ -133,9 +136,10 @@
 				)
 			);
 			
+			// get our entries!
 			$entries = Symphony::Database()->fetch($sql);
-			
 			$total_entries = Symphony::Database()->fetchVar('total', 0, 'SELECT FOUND_ROWS() AS `total`');
+			
 			$result->appendChild(
 				General::buildPaginationElement(
 					$total_entries,
@@ -146,6 +150,7 @@
 			);
 			
 			$sections_xml = new XMLElement('sections');
+			
 			foreach($sections as $id => $section) {
 				$sections_xml->appendChild(
 					new XMLElement(
@@ -160,7 +165,7 @@
 			}
 			$result->appendChild($sections_xml);
 			
-			$highest_score = null;
+			//$highest_score = null;
 			
 			foreach($entries as $entry) {
 				
@@ -176,6 +181,7 @@
 				);
 			}
 			
+			// send entry IDs as Output Parameterss
 			$param_pool['ds-' . $this->dsParamROOTELEMENT] = implode(', ', $param_output);
 		
 			return $result;		
