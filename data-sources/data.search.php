@@ -164,14 +164,14 @@
 			
 			foreach($entries as $entry) {
 				
-				if (is_null($highest_score)) $highest_score = $entry['score'];
+				//if (is_null($highest_score)) $highest_score = $entry['score'];
 				
 				$param_output[] = $entry['entry_id'];
 				$result->appendChild(
 					new XMLElement('entry', null, array(
 						'id' => $entry['entry_id'],
 						'section' => $sections[$entry['section_id']]['handle'],
-						'score' => (int)(($entry['score'] / $highest_score) * 100)
+						//'score' => (int)(($entry['score'] / $highest_score) * 100)
 					))
 				);
 			}
