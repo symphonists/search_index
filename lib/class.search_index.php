@@ -123,6 +123,8 @@ Class SearchIndex {
 	}
 	
 	public function wildcardSearchKeywords($string) {
+		if (Symphony::Configuration()->get('append-wildcard', 'search_index') != 'yes') return $string;
+		
 		$string = explode(' ', $string);
 		// add wildcard after each word
 		foreach($string as &$word) {

@@ -27,9 +27,15 @@
 		*/		
 		public function install(){
 			
+			// number of entries per page when rebuilding index
 			Symphony::Configuration()->set('re-index-per-page', 20, 'search_index');
+			// refresh frequency when rebuilding index
 			Symphony::Configuration()->set('re-index-refresh-rate', 0.5, 'search_index');
 			
+			// append wildcard * to the end of search phrases (reduces performance, increases matches)
+			Symphony::Configuration()->set('append-wildcard', 'yes', 'search_index');
+			
+			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
 			Symphony::Configuration()->set('get-param-keywords', 'keywords', 'search_index');
 			Symphony::Configuration()->set('get-param-per-page', 'per-page', 'search_index');
