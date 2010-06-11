@@ -44,7 +44,7 @@ var SiteIndex = {
 				if (total_pages != page++) {
 					setTimeout(function() {
 						self.indexSectionByPage(section_id, page);
-					}, (self.config.re_index_refresh_rate * 1000));
+					}, (self.config['re-index-refresh-rate'] * 1000));
 				}
 				// proceed to next section
 				else {					
@@ -52,7 +52,7 @@ var SiteIndex = {
 						span.text(total_entries + ' entries').removeClass('re-index');
 						self.progress++;
 						self.indexNextSection();
-					}, (self.config.re_index_refresh_rate * 1000));
+					}, (self.config['re-index-refresh-rate'] * 1000));
 				}
 			}
 		});
