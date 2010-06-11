@@ -53,11 +53,11 @@ The XML returned from this Data Source looks like this:
 			<section id="1" handle="articles">Articles</section>
 			<section id="2" handle="comments">Comments</section>
 		</sections>
-		<entry id="3" section="comments" score="100" />
-		<entry id="5" section="articles" score="100" />
-		<entry id="2" section="articles" score="50" />
-		<entry id="1" section="comments" score="50" />
-		<entry id="3" section="comments" score="20" />
+		<entry id="3" section="comments" />
+		<entry id="5" section="articles" />
+		<entry id="2" section="articles" />
+		<entry id="1" section="comments" />
+		<entry id="3" section="comments" />
 	</search>
 
 This in itself is not enough to render a results page. To do so, use the `$ds-search` Output Parameter created by this Data Source to filter by System ID in other Data Sources. In the example above you would create a new Data Source both for Articles and Comments, filtering System ID by the `$ds-search` parameter. Use XSLT to iterate over the `<entry ... />` elements above, and cross-reference with the matching entries from the Articles and Comments Data Sources.
