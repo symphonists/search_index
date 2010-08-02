@@ -1,4 +1,4 @@
-<?
+<?php
 
 Class ReindexDataSource extends Datasource{
 	

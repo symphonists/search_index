@@ -1,4 +1,4 @@
-<?
+<?php
 
 Class EntryXMLDataSource extends Datasource{
 	
