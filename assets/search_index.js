@@ -41,7 +41,7 @@ var SiteIndex = {
 				span.show().text('Indexing page ' + page + ' of ' + total_pages);
 				
 				// there are more pages left
-				if (total_pages != page++) {
+				if (total_pages > 0 && total_pages != page++) {
 					setTimeout(function() {
 						self.indexSectionByPage(section_id, page);
 					}, (self.config['re-index-refresh-rate'] * 1000));
