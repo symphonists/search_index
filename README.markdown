@@ -81,3 +81,17 @@ For more information see <http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolea
 
 ## Known issues
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
+
+## Changelog
+
+### 0.3a
+* massively improved indexing performance (large sections 10s to 1.5s per page of indexing)
+* removed auto-wildcard, added boolean support
+* added ability to store default sections in config (thanks Jonas!)
+* added ability to weight sections up or down (dropdown when modifying the index)
+* each search is now logged in a separate table for auditing and analysis (future versions might provide a UI to inspect this data)
+* added new sort value `score-recency` which sorts results using a combined function of relevance and recency (entry creation date)
+* added summary excerpt of matched text in XML, including highlighting of matched words
+
+### 0.2a
+* public release
