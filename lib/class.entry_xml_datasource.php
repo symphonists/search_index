@@ -1,15 +1,18 @@
 <?php
 
+require_once(TOOLKIT . '/class.datasource.php');
+
 Class EntryXMLDataSource extends Datasource{
 	
 	public $dsParamROOTELEMENT = 'entries';
 	public $dsSource = NULL;
 	
 	public $dsParamORDER = 'desc';
-	public $dsParamLIMIT = '1';
+	public $dsParamLIMIT = '99';
 	public $dsParamREDIRECTONEMPTY = 'no';
 	public $dsParamSORT = 'system:id';
 	public $dsParamSTARTPAGE = '1';
+	public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 	
 	public function __construct(&$parent, $env=NULL, $process_params=TRUE){
 		parent::__construct($parent, $env, $process_params);

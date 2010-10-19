@@ -82,6 +82,7 @@
 			$is_new = !isset($this->_indexes[$this->_section->get('id')]);			
 			
 			$this->_indexes[$this->_section->get('id')]['fields'] = $fields['included_elements'];
+			$this->_indexes[$this->_section->get('id')]['weighting'] = $fields['weighting'];
 			
 			if (!is_array($fields['filter'])) $fields['filter'] = array($fields['filter']);
 			
@@ -134,8 +135,25 @@
 				$fields_options,
 				array('multiple'=>'multiple')
 			));
-
 			$group->appendChild($label);
+			
+			$weighting_options = array();
+			if ($this->_index['weighting'] == NULL) $this->_index['weighting'] = 2;
+			foreach(array('Highest','High','Medium (none)','Low','Lowest') as $i => $w) {
+				$weighting_options[] = array(
+					$i,
+					($i == $this->_index['weighting']),
+					$w
+				);
+			}
+			
+			$label = Widget::Label(__('Weighting'));
+			$label->appendChild(Widget::Select(
+				'fields[weighting]',
+				$weighting_options
+			));
+			$group->appendChild($label);
+			
 			$fieldset->appendChild($group);
 			$this->Form->appendChild($fieldset);
 			
@@ -149,7 +167,7 @@
 
 				
 			$div = new XMLElement('div');
-			$div->setAttribute('class', 'contextual ' . $fields['section']->get('id'));
+			$div->setAttribute('class', 'subsection contextual ' . $fields['section']->get('id'));
 			$h3 = new XMLElement('h3', __('Filter %s by', array($fields['section']->get('name'))));
 			$h3->setAttribute('class', 'label');
 			$div->appendChild($h3);

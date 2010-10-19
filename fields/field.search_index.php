@@ -117,7 +117,7 @@
 			if (!is_array($data)) $data = array($data);
 			
 			foreach ($data as &$value) {
-				$value = SearchIndex::wildcardSearchKeywords($this->cleanValue($value));
+				$value = SearchIndex::manipulateKeywords($this->cleanValue($value));
 			}
 			
 			$this->_key++;

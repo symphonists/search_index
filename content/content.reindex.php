@@ -56,13 +56,13 @@
 			$dom->loadXML($xml);
 			$xpath = new DomXPath($dom);
 			
+			$entry_ids = array();
+			
 			foreach($xpath->query("//entry") as $entry) {
-				$context = (object)array(
-					'section' => $this->_section,
-					'entry' => reset($this->_entryManager->fetch($entry->getAttribute('id')))
-				);
-				SearchIndex::indexEntry($context->entry, $context->section);
+				$entry_ids[] = $entry->getAttribute('id');
 			}
+			
+			SearchIndex::indexEntry($entry_ids, $ds->dsSource, FALSE);
 			
 			header('Content-type: text/xml');
 			echo $xml;

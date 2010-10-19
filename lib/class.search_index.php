@@ -3,12 +3,17 @@
 Class SearchIndex {
 	
 	private static $_entry_manager = NULL;
+	private static $_entry_xml_datasource = NULL;
+	
+	private static $_where = NULL;
+	private static $_joins = NULL;
 	
 	/**
 	* Set up static members
 	*/
 	private function assert() {
 		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(Administration::instance());
+		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
 	}
 	
 	/**
@@ -35,7 +40,7 @@ Class SearchIndex {
 	* @param int $entry
 	* @param int $section
 	*/
-	public function indexEntry($entry, $section) {
+	public function indexEntry($entry, $section, $check_filters=TRUE) {
 		self::assert();
 		
 		if (is_object($entry)) $entry = $entry->get('id');
@@ -53,55 +58,71 @@ Class SearchIndex {
 		// get the current section index config
 		$section_index = $indexed_sections[$section];
 		
-		// modified from class.datasource.php
-		// create filters and build SQL required for each
-		if(is_array($section_index['filters']) && !empty($section_index['filters'])) {				
+		// only pass entries through filters if we need to. If entry is being sent
+		// from the Re-Index AJAX it has already gone through filtering, so no need here
+		if ($check_filters === TRUE) {
 			
-			foreach($section_index['filters'] as $field_id => $filter){
+			if (self::$_where == NULL || self::$_joins == NULL) {
+				// modified from class.datasource.php
+				// create filters and build SQL required for each
+				if(is_array($section_index['filters']) && !empty($section_index['filters'])) {				
 
-				if((is_array($filter) && empty($filter)) || trim($filter) == '') continue;
+					foreach($section_index['filters'] as $field_id => $filter){
 
-				if(!is_array($filter)){
-					$filter_type = DataSource::__determineFilterType($filter);
-					$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : ',').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
-					$value = array_map('trim', $value);
-				} else {
-					$value = $filter;
+						if((is_array($filter) && empty($filter)) || trim($filter) == '') continue;
+
+						if(!is_array($filter)){
+							$filter_type = DataSource::__determineFilterType($filter);
+							$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : ',').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
+							$value = array_map('trim', $value);
+						} else {
+							$value = $filter;
+						}
+
+						$field = self::$_entry_manager->fieldManager->fetch($field_id);
+						$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? TRUE : FALSE));
+
+					}
 				}
-
-				$field = self::$_entry_manager->fieldManager->fetch($field_id);
-				$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? TRUE : FALSE));
-
+				self::$_where = $where;
+				self::$_joins = $joins;
 			}
-		}			
-		
-		// run entry though filters
-		$entry_prefilter = self::$_entry_manager->fetch($entry, $section, 1, 0, $where, $joins, FALSE, FALSE);
-		
-		// if no entry found, it didn't pass the pre-filtering
-		if (empty($entry_prefilter)) return;
-		
-		// if entry passes filtering, pass entry_id as a DS filter to the EntryXMLDataSource DS
-		$entry = reset($entry_prefilter);
-		$entry = $entry['id'];
+
+			// run entry though filters
+			$entry_prefilter = self::$_entry_manager->fetch($entry, $section, 1, 0, self::$_where, self::$_joins, FALSE, FALSE);
+
+			// if no entry found, it didn't pass the pre-filtering
+			if (empty($entry_prefilter)) return;
+
+			// if entry passes filtering, pass entry_id as a DS filter to the EntryXMLDataSource DS
+			$entry = reset($entry_prefilter);
+			$entry = $entry['id'];
+			
+		}
 		
 		// create a DS and filter on System ID of the current entry to build the entry's XML			
-		$ds = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
-		$ds->dsParamINCLUDEDELEMENTS = $indexed_sections[$section]['fields'];
-		$ds->dsParamFILTERS['id'] = $entry;
-		$ds->dsSource = (string)$section;
+		#$ds = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
+		self::$_entry_xml_datasource->dsParamINCLUDEDELEMENTS = $indexed_sections[$section]['fields'];
+		self::$_entry_xml_datasource->dsParamFILTERS['id'] = implode(',',$entry);
+		self::$_entry_xml_datasource->dsSource = (string)$section;
 		
 		$param_pool = array();
-		$entry_xml = $ds->grab($param_pool);
+		$entry_xml = self::$_entry_xml_datasource->grab($param_pool);
 		
 		require_once(TOOLKIT . '/class.xsltprocess.php');
-
-		// get text value of the entry
-		$proc = new XsltProcess();
-		$data = $proc->process($entry_xml->generate(), file_get_contents(EXTENSIONS . '/search_index/lib/parse-entry.xsl'));
-		$data = trim($data);
 		
-		self::saveEntryIndex($entry, $section, $data);
+		$xml = simplexml_load_string($entry_xml->generate());
+		
+		foreach($xml->xpath("//entry") as $entry_xml) {
+			
+			// get text value of the entry
+			$proc = new XsltProcess();
+			$data = $proc->process($entry_xml->asXML(), file_get_contents(EXTENSIONS . '/search_index/lib/parse-entry.xsl'));
+			$data = trim($data);
+
+			self::saveEntryIndex((int)$entry_xml->attributes()->id, $section, $data);
+		}
+
 	}
 	
 	/**
@@ -155,17 +176,33 @@ Class SearchIndex {
 	*
 	* @param string $string
 	*/
-	public function wildcardSearchKeywords($string) {
+	public function manipulateKeywords($string) {
 		if (Symphony::Configuration()->get('append-wildcard', 'search_index') != 'yes') return $string;
 		
-		$string = explode(' ', $string);
-		// add wildcard after each word
-		foreach($string as &$word) {
-			if (!preg_match('/\*$/', $word)) $word .= '*';
+		// add + in front of any word that doesn't have +/-
+		// EXCEPT if words are within quotes, don't mess.
+		
+		// replace spaces within quoted phrases
+		$string = preg_replace('/"(?:[^\\"]+|\\.)*"/e', "str_replace(' ', 'SEARCH_INDEX_SPACE', '$0')", $string);
+		// correct slashed quotes sa a result of above
+		$string = stripslashes(trim($string));
+		
+		$keywords = '';
+		
+		// get each word
+		foreach(explode(' ', $string) as $word) {
+			if (!preg_match('/^(\-|\+)/', $word) && !preg_match('/^"/', $word)) {
+				$keywords .= '+' . $word;
+			} else {
+				$keywords .= $word;
+			}
+			$keywords .= ' ';
 		}
-		// join words together
-		$string = join(' ', $string);
-		return $string;
+		
+		$keywords = trim($keywords);
+		$keywords = preg_replace('/SEARCH_INDEX_SPACE/', ' ', $keywords);
+		
+		return $keywords;
 	}
 	
 }

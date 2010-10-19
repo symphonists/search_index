@@ -1,7 +1,7 @@
 # Search Index
-Version: 0.2a  
+Version: 0.3a  
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
-Build Date: 2010-06-08  
+Build Date: 2010-10-19  
 Requirements: Symphony 2.0.8
 
 ## Description
@@ -37,11 +37,20 @@ The filtered entries returned will only be those that contain the word "foo" in 
 A full-site search can be achieved using the custom Search Index Data Source included with this extension. Attach this Data Source to a page and invoke it using the following GET parameters:
 
 * `keywords` the string to search on e.g. `foo bar`
-* `sort` either `id` (entry ID), `date` (entry creation date) or `score` (relevance)
-* `direction` either `asc` or `desc`
-* `per-page` number of results per page (defaults to 20)
+* `sort` either `id` (entry ID), `date` (entry creation date), `score` (relevance) or `score-recency` (relevance with a higher weighting for newer entries) (defaults to `score`)
+* `direction` either `asc` or `desc` (defaults to `desc`)
+* `per-page` number of results per page (defaults to `20`)
 * `page` the results page number
 * `sections` a comma-delimited list of section handles to search within (only those with indexes will work) e.g. `articles,comments`
+
+Your search form might look like this:
+
+	<form action="/search/" method="get">
+		<label>Search <input type="text" name="keywords" /></label>
+		<input type="hidden" name="sort" value="score-recency" />
+		<input type="hidden" name="per-page" value="10" />
+		<input type="hidden" name="sections" value="articles,comments,categories" />
+	</form>
 
 If you want to change the names of these variables, they can be modified in your Symphony `config.php`. If you are using Form Controls to post these variables from a form your variable names may be in the form `fields[...]`. If so, add `fields` to the `get-param-prefix` variable in your Symphony `config.php`.
 
@@ -60,7 +69,15 @@ The XML returned from this Data Source looks like this:
 		<entry id="3" section="comments" />
 	</search>
 
-This in itself is not enough to render a results page. To do so, use the `$ds-search` Output Parameter created by this Data Source to filter by System ID in other Data Sources. In the example above you would create a new Data Source both for Articles and Comments, filtering System ID by the `$ds-search` parameter. Use XSLT to iterate over the `<entry ... />` elements above, and cross-reference with the matching entries from the Articles and Comments Data Sources.
+This in itself is not enough to render a results page. To do so, use the `$ds-search` Output Parameter created by this Data Source to filter by System ID in other Data Sources. In the example above you would create a new Data Source each for Articles and Comments, filtering System ID by the `$ds-search` parameter. Use XSLT to iterate over the `<entry ... />` elements above, and cross-reference with the matching entries from the Articles and Comments Data Sources.
+
+## Weighting
+We all know that all sections are equal, only some are more equal than others ;-) You can give higher or lower weighting to results from certain sections, by issuing them a weighting when you configure their Search Index. The default is `Medium` (no weighting), but if you want more chance of entries from your section appearing higher up the search results, choose `High`; or for even more prominence `Highest`. The opposite is true: to bury entries lower down the results then choose `Low` or `Lowest`. This weighting has the effect of doubling/quadrupling or halving/quartering the original "relevance" score calculated by the search.
+
+## Boolean search
+Search Index makes use of MySQL's boolean fulltext search. When using the multi-section search, you can use the `+` and `-` directives to make results more specific. In fact, Search Index actually appends `+` to all words, making them required, to make the results as specific is possible. You can also use double-quotes too, to search for specific strings.
+
+For more information see <http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolean.html>
 
 ## Known issues
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source

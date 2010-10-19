@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.1',
-				'release-date'	=> '2010-01-17',
+				'version'		=> '0.3a',
+				'release-date'	=> '2010-10-19',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
@@ -34,6 +34,9 @@
 			
 			// append wildcard * to the end of search phrases (reduces performance, increases matches)
 			Symphony::Configuration()->set('append-wildcard', 'yes', 'search_index');
+			
+			// default sections if none specifed in URL
+			Symphony::Configuration()->set('default-sections', '', 'search_index');
 			
 			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
@@ -66,6 +69,19 @@
 					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
 				);
 				
+				Symphony::Database()->query(
+					"CREATE TABLE `sym_search_index_logs` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `date` datetime NOT NULL,
+					  `keywords` varchar(255) default NULL,
+					  `sections` varchar(255) default NULL,
+					  `page` int(11) NOT NULL,
+					  `results` int(11) default NULL,
+					  `session_id` varchar(255) default NULL,
+					  PRIMARY KEY  (`id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
 			}
 			catch (Exception $e){
 				return false;
@@ -80,11 +96,12 @@
 		public function uninstall(){
 			
 			Symphony::Configuration()->remove('search_index');			
-			$this->_Parent->saveConfig();
+			Administration::instance()->saveConfig();
 			
 			try{
 				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_fields_search_index`");
+				Symphony::Database()->query("DROP TABLE `sym_search_index_logs`");
 			}
 			catch(Exception $e){
 				return false;

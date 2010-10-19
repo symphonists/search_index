@@ -5,6 +5,7 @@ var SiteIndex = {
 	config: {},
 	
 	init: function() {
+		
 		var self = this;
 		
 		// cache IDs of sections to re-index
