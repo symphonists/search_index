@@ -8,12 +8,21 @@ Class SearchIndex {
 	private static $_where = NULL;
 	private static $_joins = NULL;
 	
+	private static $_context = NULL;
+	
 	/**
 	* Set up static members
 	*/
 	private function assert() {
-		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(Administration::instance());
-		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
+
+		$mode = (isset($_GET['mode']) && strtolower($_GET['mode']) == 'administration' 
+				? 'administration' 
+				: 'frontend');
+		
+		self::$_context = ($mode == 'administration' ? Administration::instance() : Frontend::instance());
+		
+		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(self::$_context);
+		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(self::$_context, NULL, FALSE);
 	}
 	
 	/**
@@ -31,7 +40,7 @@ Class SearchIndex {
 	*/
 	public static function saveIndexes($indexes) {
 		Symphony::Configuration()->set('indexes', serialize($indexes), 'search_index');
-		Administration::instance()->saveConfig();
+		self::$_context->saveConfig();
 	}
 	
 	/**
@@ -61,7 +70,7 @@ Class SearchIndex {
 		// only pass entries through filters if we need to. If entry is being sent
 		// from the Re-Index AJAX it has already gone through filtering, so no need here
 		if ($check_filters === TRUE) {
-			
+
 			if (self::$_where == NULL || self::$_joins == NULL) {
 				// modified from class.datasource.php
 				// create filters and build SQL required for each
@@ -100,6 +109,8 @@ Class SearchIndex {
 			
 		}
 		
+		if (!is_array($entry)) $entry = array($entry);
+		
 		// create a DS and filter on System ID of the current entry to build the entry's XML			
 		#$ds = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
 		self::$_entry_xml_datasource->dsParamINCLUDEDELEMENTS = $indexed_sections[$section]['fields'];
@@ -119,7 +130,6 @@ Class SearchIndex {
 			$proc = new XsltProcess();
 			$data = $proc->process($entry_xml->asXML(), file_get_contents(EXTENSIONS . '/search_index/lib/parse-entry.xsl'));
 			$data = trim($data);
-
 			self::saveEntryIndex((int)$entry_xml->attributes()->id, $section, $data);
 		}
 
@@ -162,7 +172,7 @@ Class SearchIndex {
 	*
 	* @param int $entry_id
 	*/
-	public function deleteIndexByEntry($entry_id) {			
+	public function deleteIndexByEntry($entry_id) {
 		Symphony::Database()->query(
 			sprintf(
 				"DELETE FROM `tbl_search_index` WHERE `entry_id` = %d",

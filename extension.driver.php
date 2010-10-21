@@ -129,6 +129,11 @@
 					'delegate'	=> 'Delete',
 					'callback'	=> 'deleteEntryIndex'
 				),
+				array(
+					'page' => '/frontend/',
+					'delegate' => 'EventPostSaveFilter',
+					'callback' => 'indexEntry'
+				),
 			);
 		}
 		
@@ -150,8 +155,8 @@
 		*
 		* @param object $context
 		*/
-		public function indexEntry($context) {
-			SearchIndex::indexEntry($context['entry']->get('id'), $context['section']->get('id'));			
+		public function indexEntry($context) {			
+			SearchIndex::indexEntry($context['entry']->get('id'), $context['entry']->get('section_id'));
 		}
 		
 		/**
@@ -160,7 +165,13 @@
 		* @param object $context
 		*/
 		public function deleteEntryIndex($context) {
-			SearchIndex::deleteIndexByEntry($context['entry_id']);
+			if (is_array($context['entry_id'])) {
+				foreach($context['entry_id'] as $entry_id) {
+					SearchIndex::deleteIndexByEntry($entry_id);
+				}
+			} else {
+				SearchIndex::deleteIndexByEntry($context['entry_id']);
+			}
 		}
 		
 	}

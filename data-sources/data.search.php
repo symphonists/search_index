@@ -242,7 +242,7 @@
 		$text = trim($text);
 		$text = preg_replace("/\n/", '', $text);
 		
-		$string_length = 270;
+		$string_length = 200;
 
 		// Extract positive keywords and phrases
 		preg_match_all('/ ("([^"]+)"|(?!OR)([^" ]+))/', ' '. $keywords, $matches);
