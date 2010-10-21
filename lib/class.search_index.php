@@ -39,6 +39,7 @@ Class SearchIndex {
 	* @param array $indexes
 	*/
 	public static function saveIndexes($indexes) {
+		self::assert();
 		Symphony::Configuration()->set('indexes', serialize($indexes), 'search_index');
 		self::$_context->saveConfig();
 	}
