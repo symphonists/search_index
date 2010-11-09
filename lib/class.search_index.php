@@ -242,7 +242,8 @@ Class SearchIndex {
 
 		// Prepare text
 		$text = ' '. strip_tags(str_replace(array('<', '>'), array(' <', '> '), $text)) .' ';
-		//array_walk($keywords, 'SearchIndex::parseExcerpt');
+		// no idea what this next line actually does, nothing is harmed if it's simply commented out...
+		array_walk($keywords, 'SearchIndex::_parseExcerptReplace');
 		$workkeys = $keywords;
 
 		// Extract a fragment per keyword for at most 4 keywords.
@@ -336,6 +337,10 @@ Class SearchIndex {
 		$text = trim($text);
 	
 		return $text;
+	}
+	
+	private static function _parseExcerptReplace(&$text) {
+		$text = preg_quote($text, '/');
 	}
 	
 }
