@@ -32,8 +32,10 @@
 		
 		private function __setContext($section_id) {
 			$this->_index = $this->_indexes[$section_id];
-			foreach($this->_sections as $s) {
-				if ($s->get('id') == $section_id) $this->_section = $s;
+			if (is_array($this->_sections)) {
+				foreach($this->_sections as $s) {
+					if ($s->get('id') == $section_id) $this->_section = $s;
+				}
 			}
 		}
 				
