@@ -204,7 +204,9 @@ Class SearchIndex {
 		// get each word
 		foreach(explode(' ', $string) as $word) {
 			if (!preg_match('/^(\-|\+)/', $word) && !preg_match('/^"/', $word)) {
-				$word = '+' . $word;
+				if (Symphony::Configuration()->get('append-all-words-required', 'search_index') == 'yes') {
+					$word = '+' . $word;
+				}
 				if (!preg_match('/\*$/', $word) && Symphony::Configuration()->get('append-wildcard', 'search_index') == 'yes') {
 					$word = $word . '*';
 				}

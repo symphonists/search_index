@@ -44,9 +44,14 @@
 			$param_output = array();
 			
 			$get = $_GET;
+			
 			// look for key in GET array if it's specified
 			if (Symphony::Configuration()->get('get-param-prefix', 'search_index') != '') {
-				$get = $get[Symphony::Configuration()->get('get-param-prefix', 'search_index')];
+				if (Symphony::Configuration()->get('get-param-prefix', 'search_index') == 'param_pool') {
+					$get = $this->_env['param'];
+				} else {
+					$get = $get[Symphony::Configuration()->get('get-param-prefix', 'search_index')];
+				}
 			}
 			
 			$param_keywords = Symphony::Configuration()->get('get-param-keywords', 'search_index');
@@ -109,7 +114,7 @@
 				switch ($weight) {
 					case 0: $weight = 4; break; // highest
 					case 1: $weight = 2; break; // high
-					//case 2: $weight = 1; break; // none
+					case 2: $weight = 1; break; // none
 					case 3: $weight = 0.5; break; // low
 					case 4: $weight = 0.25; break; // lowest
 				}

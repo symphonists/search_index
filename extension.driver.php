@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.3a',
-				'release-date'	=> '2010-10-19',
+				'version'		=> '0.4',
+				'release-date'	=> '2010-11-09',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
@@ -33,7 +33,10 @@
 			Symphony::Configuration()->set('re-index-refresh-rate', 0.5, 'search_index');
 			
 			// append wildcard * to the end of search phrases (reduces performance, increases matches)
-			Symphony::Configuration()->set('append-wildcard', 'yes', 'search_index');
+			Symphony::Configuration()->set('append-wildcard', 'no', 'search_index');
+			
+			// append + to the start of search phrases (makes all words required)
+			Symphony::Configuration()->set('append-all-words-required', 'yes', 'search_index');
 			
 			// default sections if none specifed in URL
 			Symphony::Configuration()->set('default-sections', '', 'search_index');
@@ -68,6 +71,7 @@
 					  `section_id` int(11) NOT NULL,
 					  `data` text,
 					  PRIMARY KEY (`id`),
+					  KEY `entry_id` (`entry_id`),
 					  FULLTEXT KEY `data` (`data`)
 					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
 				);
@@ -81,7 +85,8 @@
 					  `page` int(11) NOT NULL,
 					  `results` int(11) default NULL,
 					  `session_id` varchar(255) default NULL,
-					  PRIMARY KEY  (`id`)
+					  PRIMARY KEY  (`id`),
+					  FULLTEXT KEY `keywords` (`keywords`)
 					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 				);
 				

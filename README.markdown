@@ -1,8 +1,8 @@
 # Search Index
-Version: 0.3a  
+Version: 0.4   
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
-Build Date: 2010-10-19  
-Requirements: Symphony 2.0.8
+Build Date: 2010-11-09  
+Requirements: Symphony 2.1.2
 
 ## Description
 Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index Field that allows keyword filtering in Data Sources, or the included Search Index Data Source for searching multiple sections at once.
@@ -54,6 +54,11 @@ Your search form might look like this:
 
 If you want to change the names of these variables, they can be modified in your Symphony `config.php`. If you are using Form Controls to post these variables from a form your variable names may be in the form `fields[...]`. If so, add `fields` to the `get-param-prefix` variable in your Symphony `config.php`.
 
+#### Using Symphony URL Parameters
+The default is to use GET parameters such as `/search/?keywords=foo+bar&page=2` but if you prefer to use URL Parameters such as `/search/foo+bar/2/`, set the `get-param-prefix` variable to `param_pool` in your `config.php` and the extension will look at the Param Pool rather than the $_GET array for its values.
+
+#### Example XML
+
 The XML returned from this Data Source looks like this:
 
 	<search keywords="foo+bar" sort="score" direction="desc">
@@ -79,10 +84,62 @@ Search Index makes use of MySQL's boolean fulltext search. When using the multi-
 
 For more information see <http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolean.html>
 
+## Configuration
+The common configuration options are discussed above. This is a full list of the variables you *should* see in your `config.php`. If some are missing it is because you have previously installed an earlier version of the extension. You can add these variables manually to make use of them.
+
+### `re-index-per-page`
+Defaults to `20`. When manually re-indexing sections in the backend (Blueprints > Search Indexes, highlight rows an select "Re-index" from the With Selected dropdown) this is the number of entries per "page" that will be re-indexed at once. If you have 100 entries and `re-index-per-page` is `20` then you will have 5 pages of entries that will index, one after the other.
+
+### `re-index-refresh-rate`
+Defaults to `0.5` seconds. This is the "pause" between each cycle of indexing when manually re-indexing sections. If you have a high traffic site (or slow server) and you are worried that many consecutive page refreshes will use too much server power, then choose a higher number and there will be a longer pause between each page of indexing. The larger the number, the longer you have to wait during re-indexing. Set to `0` for super-quick times.
+
+### `append-wildcard`
+Defaults to `no`. When enabled this option will append the `*` wildcard character to the end of each word in your search phrase thereby allowing partial word matches. For example:
+
+    before: foo bar
+	after: foo* bar*
+
+If you have entries containing the text "food" or "barn" the first search would not find these. The second would.
+
+This is disabled by default because it will decrease the relevance of your results and may not perform well on massive datasets. If you need this functionality you should investigate "word stemming" instead.
+
+### `append-all-words-required`
+Defaults to `yes`. When enabled this option will append the `+` "required" character to the start of each word in your search phrase. This has the effect of making all words required. For example:
+
+    before: foo bar
+	after: +foo +bar
+
+If you have one entry containing "foo" and another containing "bar" (but neither contain both words), then the first search will find both entries, and the second search will find none. 
+
+While this may decrease the number of results, the results will be more specific and hopefully relevant.
+
+### TODO: document these!
+
+* `default-sections` => NULL,
+* `excerpt-length` => `250`,
+* `get-param-prefix` => NULL,
+* `get-param-keywords` => `keywords`,
+* `get-param-per-page` => `per-page`,
+* `get-param-sort` => `sort`,
+* `get-param-direction` => `direction`,
+* `get-param-sections` => `sections`,
+* `get-param-page` => `page`,
+* `indexes` => `a:1:{i:1;a:3:{s:6:\"fields\";a:2:{i:0;s:5:\"test2\";i:1;s:9:\"html-test\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}}`,
+
+
 ## Known issues
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
 
 ## Changelog
+
+### 0.4
+* fixed several bugs (thanks designermonkey, Allen, klaftertief, icek, zimmen!)
+* added additional indexes to `tbl_search_index` and `tbl_search_index_logs` for mega performance improvement for single-section search, it is recommended you make sure indexes in your tables match these:
+  * `tbl_search_index`: `KEY 'entry_id' ('entry_id')` and `FULLTEXT KEY 'data' ('data')`
+  * `tbl_search_index_logs`: `FULLTEXT KEY 'keywords' ('keywords')`
+* refined excerpt code
+* added option to use pretty URL Parameters instead of `$_GET` params only
+* added Symphony 2.1.2 readiness
 
 ### 0.3a
 * massively improved indexing performance (large sections 10s to 1.5s per page of indexing)
