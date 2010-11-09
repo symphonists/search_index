@@ -103,7 +103,7 @@
 			
 			$weighting = '';
 			$indexed_sections = SearchIndex::getIndexes();
-			//var_dump($indexed_sections);die;
+
 			foreach($indexed_sections as $section_id => $index) {
 				$weight = is_null($index['weighting']) ? 2 : $index['weighting'];
 				switch ($weight) {
@@ -132,8 +132,8 @@
 						%3\$s						
 					) AS `score`
 				FROM
-					sym_search_index as `index`
-					JOIN sym_entries as `e` ON (index.entry_id = e.id)
+					tbl_search_index as `index`
+					JOIN tbl_entries as `e` ON (index.entry_id = e.id)
 				WHERE
 					MATCH(index.data) AGAINST ('%4\$s' IN BOOLEAN MODE)
 					AND e.section_id IN ('%5\$s')
@@ -207,11 +207,12 @@
 					new XMLElement(
 						'entry',
 						General::sanitize(
-							self::parseExcerpt($keywords, $entry['data'])
+							SearchIndex::parseExcerpt($keywords, $entry['data'])
 						),
 						array(
 							'id' => $entry['entry_id'],
-							'section' => $sections[$entry['section_id']]['handle']
+							'section' => $sections[$entry['section_id']]['handle'],
+							'score' => round($entry['score'], 3)
 						)
 					)
 				);
@@ -237,113 +238,4 @@
 
 		}
 	
-	private static function parseExcerpt($keywords, $text) {
-		
-		$text = trim($text);
-		$text = preg_replace("/\n/", '', $text);
-		
-		$string_length = 200;
-
-		// Extract positive keywords and phrases
-		preg_match_all('/ ("([^"]+)"|(?!OR)([^" ]+))/', ' '. $keywords, $matches);
-		$keywords = array_merge($matches[2], $matches[3]);
-
-		// Prepare text
-		$text = ' '. strip_tags(str_replace(array('<', '>'), array(' <', '> '), $text)) .' ';
-		array_walk($keywords, '_search_excerpt_replace');
-		$workkeys = $keywords;
-
-		// Extract a fragment per keyword for at most 4 keywords.
-		// First we collect ranges of text around each keyword, starting/ending
-		// at spaces.
-		// If the sum of all fragments is too short, we look for second occurrences.
-		$ranges = array();
-		$included = array();
-		$length = 0;
-		while ($length < $string_length && count($workkeys)) {
-			foreach ($workkeys as $k => $key) {
-				if (strlen($key) == 0) {
-					unset($workkeys[$k]);
-					unset($keywords[$k]);
-					continue;
-				}
-				if ($length >= $string_length) {
-					break;
-				}
-				// Remember occurrence of key so we can skip over it if more occurrences
-				// are desired.
-				if (!isset($included[$key])) {
-					$included[$key] = 0;
-				}
-				// Locate a keyword (position $p), then locate a space in front (position
-				// $q) and behind it (position $s)
-				if (preg_match('/'. $boundary . $key . $boundary .'/iu', $text, $match, PREG_OFFSET_CAPTURE, $included[$key])) {
-					$p = $match[0][1];
-					if (($q = strpos($text, ' ', max(0, $p - 60))) !== FALSE) {
-						$end = substr($text, $p, 80);
-						if (($s = strrpos($end, ' ')) !== FALSE) {
-							$ranges[$q] = $p + $s;
-							$length += $p + $s - $q;
-							$included[$key] = $p + 1;
-						}
-						else {
-							unset($workkeys[$k]);
-						}
-					}
-					else {
-						unset($workkeys[$k]);
-					}
-				}
-				else {
-					unset($workkeys[$k]);
-				}
-			}
-		}
-
-		// If we didn't find anything, return the beginning.
-		if (count($ranges) == 0) {
-			if (strlen($text) > $string_length) {
-				return substr($text, 0, $string_length) . '...';
-			} else {
-				return $text;
-			}
-		}
-
-		// Sort the text ranges by starting position.
-		ksort($ranges);
-
-		// Now we collapse overlapping text ranges into one. The sorting makes it O(n).
-		$newranges = array();
-		foreach ($ranges as $from2 => $to2) {
-			if (!isset($from1)) {
-				$from1 = $from2;
-				$to1 = $to2;
-				continue;
-			}
-			if ($from2 <= $to1) {
-				$to1 = max($to1, $to2);
-			}
-			else {
-				$newranges[$from1] = $to1;
-				$from1 = $from2;
-				$to1 = $to2;
-			}
-		}
-		$newranges[$from1] = $to1;
-
-		// Fetch text
-		$out = array();
-		foreach ($newranges as $from => $to) {
-			$out[] = substr($text, $from, $to - $from);
-		}
-		$text = (isset($newranges[0]) ? '' : '...') . implode('...', $out) . '...';
-
-		// Highlight keywords. Must be done at once to prevent conflicts ('strong' and '<strong>').
-		$text = preg_replace('/'. $boundary .'('. implode('|', $keywords) .')'. $boundary .'/iu', '<strong>\0</strong>', $text);
-		
-		$text = trim($text);
-		
-		return $text;
 	}
-	
-}

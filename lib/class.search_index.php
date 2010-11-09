@@ -30,7 +30,9 @@ Class SearchIndex {
 	*/
 	public static function getIndexes() {
 		$indexes = Symphony::Configuration()->get('indexes', 'search_index');
-		return unserialize($indexes);			
+		$indexes = preg_replace("/\\\/",'',$indexes);
+		$unserialised = unserialize($indexes);
+		return unserialize($indexes);
 	}
 	
 	/**
@@ -183,15 +185,14 @@ Class SearchIndex {
 	}
 	
 	/**
-	* Append wildcard character to the words of a search string
+	* Pre-manipulation of search string
+	* 1. Make all words required by prefixing with + (if no +/- already prefixed)
+	* 2. Leave "quoted phrases" untouched
+	* 3. If enabled in config, append wildcard * to end of words for partial matching
 	*
 	* @param string $string
 	*/
 	public function manipulateKeywords($string) {
-		if (Symphony::Configuration()->get('append-wildcard', 'search_index') != 'yes') return $string;
-		
-		// add + in front of any word that doesn't have +/-
-		// EXCEPT if words are within quotes, don't mess.
 		
 		// replace spaces within quoted phrases
 		$string = preg_replace('/"(?:[^\\"]+|\\.)*"/e', "str_replace(' ', 'SEARCH_INDEX_SPACE', '$0')", $string);
@@ -203,17 +204,138 @@ Class SearchIndex {
 		// get each word
 		foreach(explode(' ', $string) as $word) {
 			if (!preg_match('/^(\-|\+)/', $word) && !preg_match('/^"/', $word)) {
-				$keywords .= '+' . $word;
-			} else {
-				$keywords .= $word;
+				$word = '+' . $word;
+				if (!preg_match('/\*$/', $word) && Symphony::Configuration()->get('append-wildcard', 'search_index') == 'yes') {
+					$word = $word . '*';
+				}
 			}
-			$keywords .= ' ';
+			$keywords .= $word . ' ';
 		}
 		
 		$keywords = trim($keywords);
 		$keywords = preg_replace('/SEARCH_INDEX_SPACE/', ' ', $keywords);
 		
 		return $keywords;
+	}
+	
+	public static function parseExcerpt($keywords, $text) {
+	
+		$text = trim($text);
+		$text = preg_replace("/\n/", '', $text);
+		
+		// remove punctuation for highlighting
+		$keywords = preg_replace("/[^A-Za-z0-9\s]/", '', $keywords);
+	
+		$string_length = (Symphony::Configuration()->get('excerpt-length', 'search_index')) ? Symphony::Configuration()->get('excerpt-length', 'search_index') : 200;
+		$between_start = $string_length / 2;
+		$between_end = $string_length / 2;
+		$elipsis = '&#8230;';
+
+		// Extract positive keywords and phrases
+		preg_match_all('/ ("([^"]+)"|(?!OR)([^" ]+))/', ' '. $keywords, $matches);
+		$keywords = array_merge($matches[2], $matches[3]);
+	
+		// don't highlight short words
+		foreach($keywords as $i => $keyword) {
+			if (strlen($keyword) < 3) unset($keywords[$i]);
+		}
+
+		// Prepare text
+		$text = ' '. strip_tags(str_replace(array('<', '>'), array(' <', '> '), $text)) .' ';
+		//array_walk($keywords, 'SearchIndex::parseExcerpt');
+		$workkeys = $keywords;
+
+		// Extract a fragment per keyword for at most 4 keywords.
+		// First we collect ranges of text around each keyword, starting/ending
+		// at spaces.
+		// If the sum of all fragments is too short, we look for second occurrences.
+		$ranges = array();
+		$included = array();
+		$length = 0;
+		while ($length < $string_length && count($workkeys)) {
+			foreach ($workkeys as $k => $key) {
+				if (strlen($key) == 0) {
+					unset($workkeys[$k]);
+					unset($keywords[$k]);
+					continue;
+				}
+				if ($length >= $string_length) {
+					break;
+				}
+				// Remember occurrence of key so we can skip over it if more occurrences
+				// are desired.
+				if (!isset($included[$key])) {
+					$included[$key] = 0;
+				}
+				// Locate a keyword (position $p), then locate a space in front (position
+				// $q) and behind it (position $s)
+				if (preg_match('/'. $boundary . $key . $boundary .'/iu', $text, $match, PREG_OFFSET_CAPTURE, $included[$key])) {
+					$p = $match[0][1];
+					if (($q = strpos($text, ' ', max(0, $p - $between_start))) !== FALSE) {
+						$end = substr($text, $p, $between_end);
+						if (($s = strrpos($end, ' ')) !== FALSE) {
+							$ranges[$q] = $p + $s;
+							$length += $p + $s - $q;
+							$included[$key] = $p + 1;
+						}
+						else {
+							unset($workkeys[$k]);
+						}
+					}
+					else {
+						unset($workkeys[$k]);
+					}
+				}
+				else {
+					unset($workkeys[$k]);
+				}
+			}
+		}
+
+		// If we didn't find anything, return the beginning.
+		if (count($ranges) == 0) {
+			if (strlen($text) > $string_length) {
+				return substr($text, 0, $string_length) . $elipsis;
+			} else {
+				return $text;
+			}
+		}
+
+		// Sort the text ranges by starting position.
+		ksort($ranges);
+
+		// Now we collapse overlapping text ranges into one. The sorting makes it O(n).
+		$newranges = array();
+		foreach ($ranges as $from2 => $to2) {
+			if (!isset($from1)) {
+				$from1 = $from2;
+				$to1 = $to2;
+				continue;
+			}
+			if ($from2 <= $to1) {
+				$to1 = max($to1, $to2);
+			}
+			else {
+				$newranges[$from1] = $to1;
+				$from1 = $from2;
+				$to1 = $to2;
+			}
+		}
+		$newranges[$from1] = $to1;
+
+		// Fetch text
+		$out = array();
+		foreach ($newranges as $from => $to) {
+			$out[] = substr($text, $from, $to - $from);
+		}
+		$text = (isset($newranges[0]) ? '' : $elipsis) . implode($elipsis, $out) . $elipsis;
+
+		// Highlight keywords. Must be done at once to prevent conflicts ('strong' and '<strong>').
+		$text = preg_replace('/'. $boundary .'('. implode('|', $keywords) .')'. $boundary .'/iu', '<strong>\0</strong>', $text);
+	
+		$text = trim($text);
+	
+		return $text;
 	}
 	
 }

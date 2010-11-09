@@ -38,6 +38,9 @@
 			// default sections if none specifed in URL
 			Symphony::Configuration()->set('default-sections', '', 'search_index');
 			
+			// default sections if none specifed in URL
+			Symphony::Configuration()->set('excerpt-length', 250, 'search_index');
+			
 			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
 			Symphony::Configuration()->set('get-param-keywords', 'keywords', 'search_index');
@@ -70,7 +73,7 @@
 				);
 				
 				Symphony::Database()->query(
-					"CREATE TABLE `sym_search_index_logs` (
+					"CREATE TABLE `tbl_search_index_logs` (
 					  `id` int(11) NOT NULL auto_increment,
 					  `date` datetime NOT NULL,
 					  `keywords` varchar(255) default NULL,
@@ -101,7 +104,7 @@
 			try{
 				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_fields_search_index`");
-				Symphony::Database()->query("DROP TABLE `sym_search_index_logs`");
+				Symphony::Database()->query("DROP TABLE `tbl_search_index_logs`");
 			}
 			catch(Exception $e){
 				return false;
