@@ -121,7 +121,7 @@
 			}
 			
 			$this->_key++;
-			$data = implode("', '", $data);
+			if (is_array($data)) $data = implode(" ", $data);
 			
 			$joins .= " LEFT JOIN `tbl_search_index` AS search_index ON (e.id = search_index.entry_id) ";			
 			$where .= " AND MATCH(search_index.data) AGAINST ('{$data}' IN BOOLEAN MODE) ";
