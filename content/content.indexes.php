@@ -159,24 +159,21 @@
 			$fieldset->appendChild($group);
 			$this->Form->appendChild($fieldset);
 			
-			
 			$fieldset = new XMLElement('fieldset');
 			$fieldset->setAttribute('class', 'settings contextual ' . __('sections') . ' ' . __('authors') . ' ' . __('navigation') . ' ' . __('Sections') . ' ' . __('System'));
 			$fieldset->appendChild(new XMLElement('legend', __('Index Filters')));
 			$p = new XMLElement('p', __('Only entries that pass these filters will be indexed.'));
 			$p->setAttribute('class', 'help');
 			$fieldset->appendChild($p);
-
 				
 			$div = new XMLElement('div');
-			$div->setAttribute('class', 'subsection contextual ' . $fields['section']->get('id'));
+			$div->setAttribute('class', 'contextual ' . $fields['section']->get('id'));
 			$h3 = new XMLElement('h3', __('Filter %s by', array($fields['section']->get('name'))));
 			$h3->setAttribute('class', 'label');
 			$div->appendChild($h3);
 			
 			$ol = new XMLElement('ol');
 			$ol->setAttribute('class', 'filters-duplicator');
-			
 			
 			if(isset($this->_index['filters']['id'])){
 				$li = new XMLElement('li');
@@ -219,12 +216,6 @@
 			$div->appendChild($ol);
 			$fieldset->appendChild($div);
 			$this->Form->appendChild($fieldset);
-			
-			
-			
-			
-			
-		// Footer -------------------------------------------------------------
 			
 			$div = new XMLElement('div');
 			$div->setAttribute('class', 'actions');
