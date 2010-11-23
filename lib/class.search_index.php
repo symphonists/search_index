@@ -75,25 +75,45 @@ Class SearchIndex {
 		if ($check_filters === TRUE) {
 
 			if (self::$_where == NULL || self::$_joins == NULL) {
-				// modified from class.datasource.php
+				
+				// modified from the core's class.datasource.php
+				
 				// create filters and build SQL required for each
 				if(is_array($section_index['filters']) && !empty($section_index['filters'])) {				
-
+					
 					foreach($section_index['filters'] as $field_id => $filter){
 
 						if((is_array($filter) && empty($filter)) || trim($filter) == '') continue;
-
+						
 						if(!is_array($filter)){
 							$filter_type = DataSource::__determineFilterType($filter);
-							$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : ',').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
+
+							$value = preg_split('/'.($filter_type == DS_FILTER_AND ? '\+' : '(?<!\\\\),').'\s*/', $filter, -1, PREG_SPLIT_NO_EMPTY);			
 							$value = array_map('trim', $value);
-						} else {
-							$value = $filter;
+
+							$value = array_map(array('Datasource', 'removeEscapedCommas'), $value);
 						}
 
-						$field = self::$_entry_manager->fieldManager->fetch($field_id);
-						$field->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? TRUE : FALSE));
+						else $value = $filter;
 
+						if(!isset($fieldPool[$field_id]) || !is_object($fieldPool[$field_id]))
+							$fieldPool[$field_id] =& self::$_entry_manager->fieldManager->fetch($field_id);
+
+						if($field_id != 'id' && !($fieldPool[$field_id] instanceof Field)){
+							throw new Exception(
+								__(
+									'Error creating field object with id %1$d, for filtering in data source "%2$s". Check this field exists.', 
+									array($field_id, $this->dsParamROOTELEMENT)
+								)
+							);
+						}
+
+						if($field_id == 'id') $where = " AND `e`.id IN ('".@implode("', '", $value)."') ";
+						else{ 
+							if(!$fieldPool[$field_id]->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false))){ $this->_force_empty_result = true; return; }
+							if(!$group) $group = $fieldPool[$field_id]->requiresSQLGrouping();
+						}
+											
 					}
 				}
 				self::$_where = $where;
