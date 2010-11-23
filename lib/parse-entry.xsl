@@ -8,8 +8,8 @@
 	</xsl:template>
 	
 	<xsl:template match="*">
-		<xsl:value-of select="concat(text(), ' ')"/>
-		<xsl:apply-templates select="*"/>
+		<xsl:apply-templates select="* | text()"/>
+		<xsl:text> </xsl:text>
 	</xsl:template>
 
 </xsl:stylesheet>
