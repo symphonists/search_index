@@ -163,7 +163,7 @@
 		*
 		* @param object $context
 		*/
-		public function indexEntry($context) {			
+		public function indexEntry($context) {
 			SearchIndex::indexEntry($context['entry']->get('id'), $context['entry']->get('section_id'));
 		}
 		
