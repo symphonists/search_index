@@ -63,9 +63,6 @@ Class SearchIndex {
 		
 		// go no further if this section isn't being indexed
 		if (!isset($indexed_sections[$section])) return;
-
-		// delete existing index for this entry
-		self::deleteIndexByEntry($entry);
 		
 		// get the current section index config
 		$section_index = $indexed_sections[$section];
@@ -149,11 +146,16 @@ Class SearchIndex {
 		
 		foreach($xml->xpath("//entry") as $entry_xml) {
 			
+			$entry_id = (int)$entry_xml->attributes()->id;
+			
+			// delete existing index for this entry
+			self::deleteIndexByEntry($entry_id);
+			
 			// get text value of the entry
 			$proc = new XsltProcess();
 			$data = $proc->process($entry_xml->asXML(), file_get_contents(EXTENSIONS . '/search_index/lib/parse-entry.xsl'));
 			$data = trim($data);
-			self::saveEntryIndex((int)$entry_xml->attributes()->id, $section, $data);
+			self::saveEntryIndex($entry_id, $section, $data);
 		}
 
 	}
