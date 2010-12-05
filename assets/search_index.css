@@ -24,3 +24,7 @@ p.intro {
 	-moz-box-shadow: 0 3px 8px #f5f5f4;
 	-webkit-box-shadow: 0 3px 8px #f5f5f4;
 }
+
+.search-index-log-filters p {
+	margin-left: 0;
+}

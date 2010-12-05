@@ -43,6 +43,13 @@
 			
 			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Logs'));
 			
+			$stats = array(
+				'unique-users' => SearchIndex::getStatsCount('unique-users', $filter_keywords),
+				'unique-searches' => SearchIndex::getStatsCount('unique-searches', $filter_keywords),
+				'unique-terms' => SearchIndex::getStatsCount('unique-terms', $filter_keywords),
+				'average-results' => SearchIndex::getStatsCount('average-results', $filter_keywords)
+			);
+			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
@@ -50,6 +57,8 @@
 			$label = new XMLElement('label', 'Filter searches containing the keywords ' . Widget::Input('keywords', $filter_keywords)->generate());
 			$filters->appendChild($label);
 			$filters->appendChild(new XMLElement('input', NULL, array('type'=>'submit','value'=>'Filter','name'=>'filter[keyword]')));
+			
+			$filters->appendChild(new XMLElement('p', '<strong>' . $stats['unique-searches'] . '</strong> unique searches from <strong>' . __($stats['unique-users'] . '</strong> unique users via <strong>' . $stats['unique-terms'] . '</strong> distinct search terms. Each search yielded an average of <strong>' . $stats['average-results'] . '</strong> results.'), array('class' => 'intro')));
 			
 			$this->Form->appendChild($filters);
 			
@@ -97,7 +106,8 @@
 					$row[] = Widget::TableData($adjusted, $adjusted_class);
 					$row[] = Widget::TableData($log['results']);
 					$row[] = Widget::TableData($log['depth']);
-					$row[] = Widget::TableData($log['session_id'] . Widget::Input("items[{$log['id']}]", null, 'checkbox')->generate());
+					$row[] = Widget::TableData($log['session_id']);
+					//$row[] = Widget::TableData($log['session_id'] . Widget::Input("items[{$log['id']}]", null, 'checkbox')->generate());
 					
 					$tableBody[] = Widget::TableRow($row);
 				}
@@ -109,6 +119,10 @@
 			);
 			
 			$this->Form->appendChild($table);
+			
+			$div = new XMLElement('div');
+			$div->setAttribute('class', 'actions');						
+			$this->Form->appendChild($div);
 						
 			// Pagination:
 			if ($pages > 1) {

@@ -425,7 +425,7 @@ Class SearchIndex {
 	}
 	
 	public static function countLogs($filter_keywords) {
-		return (integer)Symphony::Database()->fetchVar('total', 0, sprintf("SELECT COUNT(*) AS `total` FROM (%s) as temp", self::getLogsSQL($filter_keywords)));
+		return (int)Symphony::Database()->fetchVar('total', 0, sprintf("SELECT COUNT(*) AS `total` FROM (%s) as `temp`", self::getLogsSQL($filter_keywords)));
 	}
 	
 	private static function getLogsSQL($filter_keywords) {
@@ -450,5 +450,34 @@ Class SearchIndex {
 			$page_size
 		);
 		return Symphony::Database()->fetch($sql);
+	}
+	
+	public function getStatsCount($statistic, $filter_keywords) {
+		
+		$filter = ($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '');
+		
+		switch($statistic) {
+			case 'unique-users':
+				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
+					"SELECT COUNT(DISTINCT(session_id)) as `total` FROM `sym_search_index_logs` %s", $filter
+				));
+			break;
+			case 'unique-searches':
+				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
+					"SELECT COUNT(*) as `total` FROM (SELECT id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
+				));
+			break;
+			case 'unique-terms':
+				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
+					"SELECT COUNT(DISTINCT(keywords)) as `total` FROM `sym_search_index_logs` %s", $filter
+				));
+			break;
+			case 'average-results':
+				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
+					"SELECT AVG(`temp`.`average`) as `total` FROM (SELECT results as `average` FROM `sym_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
+				));
+			break;
+			
+		}
 	}
 }
