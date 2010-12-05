@@ -137,6 +137,18 @@ When a user searches for any of the synonym words, they will be replaced by the 
 
 Synonym matches are case-insensitive.
 
+## Log viewer
+
+You can see what your users have searched for on the Search Index > Logs page. This lists every unique search. A "unique search" is a combination of session and keyword, so if a user searches for the same keyword three times during one session, all three will be logged, but only displayed once in the Logs table.
+
+Column descriptions:
+
+* `Date` is the time of the search. If a user has searched multiple times, this is the time of the _first_search
+* `Keywords` is the raw keyword phrase the user used
+* `Adjusted Keywords` shows the keyword phrase if it was modified by synonym expansion
+* `Results` is the number of matched entries the search yielded
+* `Depth` is the maximum number of search results pages the user clicked through
+
 ## Known issues
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
 
