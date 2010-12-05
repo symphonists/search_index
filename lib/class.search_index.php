@@ -430,7 +430,7 @@ Class SearchIndex {
 	
 	private static function getLogsSQL($filter_keywords) {
 		$sql = sprintf(
-			"SELECT id, keywords, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id",
+			"SELECT id, keywords, keywords_manipulated, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id",
 			($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '')
 		);
 		return $sql;
