@@ -1,5 +1,5 @@
 # Search Index
-Version: 0.6.3    
+Version: 0.6.4    
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
 Build Date: 2010-11-05  
 Requirements: Symphony 2.1.2
