@@ -13,22 +13,11 @@
 		
 		public function build($context) {
 			if (isset($_POST['filter']['keyword']) != '') {
+				die;
 				redirect(Administration::instance()->getCurrentPageURL() . '?keywords=' . $_POST['keywords']);
 			}
 			
 			parent::build($context);
-		}
-		
-		public function __actionIndex() {
-			$checked = @array_keys($_POST['items']);
-			
-			if (is_array($checked) and !empty($checked)) {
-				switch ($_POST['with-selected']) {
-					case 'delete':
-						// TODO: delete from log
-						break;
-				}
-			}
 		}
 						
 		public function __viewIndex() {
@@ -122,19 +111,6 @@
 			
 			$this->Form->appendChild($table);
 						
-			$actions = new XMLElement('div');
-			$actions->setAttribute('class', 'actions');
-			
-			$options = array(
-				array(NULL, FALSE, 'With Selected...'),
-				array('delete', FALSE, 'Delete'),
-			);
-			
-			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', 'Apply', 'submit'));
-			
-			$this->Form->appendChild($actions);
-			
 			// Pagination:
 			if ($pages > 1) {
 				$ul = new XMLElement('ul');

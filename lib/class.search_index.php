@@ -451,7 +451,4 @@ Class SearchIndex {
 		);
 		return Symphony::Database()->fetch($sql);
 	}
-	
-	
-	
 }
