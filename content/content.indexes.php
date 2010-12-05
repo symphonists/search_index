@@ -106,7 +106,7 @@
 			
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes') . ' &ndash; ' . $this->_section->get('name'));
-			$this->appendSubheading("<a href=\"{$this->_uri}/indexes/\">" . __('Search Indexes') . "</a> &raquo; " . $this->_section->get('name'));
+			$this->appendSubheading(__('Search Index') . " &raquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> &raquo; " . $this->_section->get('name'));
 			
 			$fields = array('fields' => $this->_section->fetchFields(), 'section' => $this->_section);
 			
@@ -235,7 +235,7 @@
 			$this->setPageType('table');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
-			$this->appendSubheading(__('Search Indexes'));
+			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Indexes'));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
