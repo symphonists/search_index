@@ -122,7 +122,8 @@
 			}
 			
 			$original_keywords = $keywords;
-			$keywords = SearchIndex::applySynonyms($keywords);
+			$synonym_keywords = SearchIndex::applySynonyms($keywords);
+			$manipulated_keywords = SearchIndex::manipulateKeywords($synonym_keywords);
 			
 			$sql = sprintf(
 				"SELECT 
@@ -150,10 +151,10 @@
 				LIMIT %7\$d, %8\$d",
 				
 				// keywords				
-				Symphony::Database()->cleanValue($keywords),
+				Symphony::Database()->cleanValue($synonym_keywords),
 				$weighting,
 				($sort == 'score-recency') ? '/ SQRT(GREATEST(1, DATEDIFF(NOW(), creation_date)))' : '',
-				Symphony::Database()->cleanValue(SearchIndex::manipulateKeywords($keywords)),
+				Symphony::Database()->cleanValue($manipulated_keywords),
 				
 				// list of section IDs
 				implode("','", array_keys($sections)),
@@ -172,7 +173,7 @@
 			
 			$result->setAttributeArray(
 				array(
-					'keywords' => General::sanitize($keywords),
+					'keywords' => General::sanitize($synonym_keywords),
 					'sort' => $sort,
 					'direction' => $direction,
 				)
@@ -215,7 +216,7 @@
 					new XMLElement(
 						'entry',
 						General::sanitize(
-							SearchIndex::parseExcerpt($keywords, $entry['data'])
+							SearchIndex::parseExcerpt($synonym_keywords, $entry['data'])
 						),
 						array(
 							'id' => $entry['entry_id'],
@@ -243,7 +244,7 @@
 					VALUES('%s', '%s', '%s', '%s', %d, %d, '%s')",
 					date('Y-m-d H:i:s', time()),
 					Symphony::Database()->cleanValue($original_keywords),
-					Symphony::Database()->cleanValue($keywords),
+					Symphony::Database()->cleanValue($synonym_keywords),
 					Symphony::Database()->cleanValue(implode(',',$section_handles)),
 					$this->dsParamSTARTPAGE,
 					$total_entries,
