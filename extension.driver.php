@@ -13,7 +13,7 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.6',
+				'version'		=> '0.6.1',
 				'release-date'	=> '2010-12-05',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'

@@ -1,5 +1,5 @@
 # Search Index
-Version: 0.6   
+Version: 0.6.1    
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
 Build Date: 2010-11-05  
 Requirements: Symphony 2.1.2
@@ -141,6 +141,9 @@ Synonym matches are case-insensitive.
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
 
 ## Changelog
+
+### 0.6.1
+* tidied up the user interface
 
 ### 0.6
 * extension now has its own backend menu rather than sitting under Blueprints
