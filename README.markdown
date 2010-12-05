@@ -1,7 +1,7 @@
 # Search Index
-Version: 0.4   
+Version: 0.5   
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
-Build Date: 2010-11-09  
+Build Date: 2010-11-05  
 Requirements: Symphony 2.1.2
 
 ## Description
@@ -131,6 +131,10 @@ While this may decrease the number of results, the results will be more specific
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
 
 ## Changelog
+
+### 0.5
+* fixed bug whereby multiple slashes were added to serialised array in `config.php`
+* fixed bug whereby an SQL error would occur when all indexes had Medium weighting
 
 ### 0.4
 * fixed several bugs (thanks designermonkey, Allen, klaftertief, icek, zimmen!)
