@@ -4,7 +4,7 @@ span.re-index {
 }
 
 td.count-column {
-	width: 50%;
+	width: 200px;
 }
 
 span#search-index-config {
@@ -13,4 +13,5 @@ span#search-index-config {
 
 p.intro {
 	margin: 5px 19px;
+	color: #887;
 }

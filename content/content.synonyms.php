@@ -85,6 +85,7 @@
 				$this->_synonym['word']
 			));
 			$fieldset->appendChild($label);
+			$fieldset->appendChild(new XMLElement('p', 'e.g. United Kingdom', array('class'=>'help')));
 			
 			$this->Form->appendChild($fieldset);
 			
@@ -102,12 +103,11 @@
 				$this->_synonym['synonyms']
 			));
 			$fieldset->appendChild($label);
+			$fieldset->appendChild(new XMLElement('p', 'e.g. UK, Great Britain, GB', array('class'=>'help')));
 			
 			$this->Form->appendChild(new XMLElement('input', NULL, array('type'=>'hidden','name'=>'synonym[hash]','value'=>$this->_hash)));
 			
 			$this->Form->appendChild($fieldset);
-			
-			
 			
 			$div = new XMLElement('div');
 			$div->setAttribute('class', 'actions');
@@ -131,7 +131,7 @@
 				__('Search Index') . " &raquo; " . __('Synonyms') . 
 				Widget::Anchor(__('Create New'), Administration::instance()->getCurrentPageURL().'edit/', __('Create New'), 'create button')->generate()
 			);
-			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index; which entries to index; and the weighting of the section in search results.'), array('class' => 'intro')));
+			$this->Form->appendChild(new XMLElement('p', __('Configure synonym expansion, so that common misspellings or variations of phrase can be normalised to a single phrase.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);

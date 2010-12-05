@@ -23,6 +23,7 @@
 			
 			$this->_section = NULL;
 			$this->_index = NULL;
+			$this->_weightings = array('Highest','High','Medium (none)','Low','Lowest');
 		}
 		
 		public function build($context) {
@@ -141,7 +142,7 @@
 			
 			$weighting_options = array();
 			if ($this->_index['weighting'] == NULL) $this->_index['weighting'] = 2;
-			foreach(array('Highest','High','Medium (none)','Low','Lowest') as $i => $w) {
+			foreach($this->_weightings as $i => $w) {
 				$weighting_options[] = array(
 					$i,
 					($i == $this->_index['weighting']),
@@ -245,7 +246,9 @@
 			$tableBody = array();
 			
 			$tableHead[] = array('Section', 'col');
-			$tableHead[] = array('Index', 'col');
+			$tableHead[] = array('Fields', 'col');
+			$tableHead[] = array('Weighting', 'col');
+			$tableHead[] = array('Index Size', 'col');
 			
 			if (!is_array($this->_sections) or empty($this->_sections)) {
 				$tableBody = array(
@@ -259,6 +262,11 @@
 				
 				foreach ($this->_sections as $section) {
 					
+					$index = NULL;
+					if(isset($this->_indexes[$section->get('id')])) {
+						$index = $this->_indexes[$section->get('id')];
+					}
+					
 					$col_name = Widget::TableData(
 						Widget::Anchor(
 							$section->get('name'),
@@ -266,8 +274,30 @@
 						)
 					);
 					
-					if (isset($this->_indexes[$section->get('id')])) {
+					if ($index) {
 						$col_name->appendChild(Widget::Input("items[{$section->get('id')}]", null, 'checkbox'));
+					}
+					
+					if ($index && isset($index['fields']) && count($index['fields'] > 0)) {
+						$section_fields = $section->fetchFields();
+						$fields = $this->_indexes[$section->get('id')]['fields'];
+						$fields_list = '';
+						foreach($section_fields as $section_field) {
+							if (in_array($section_field->get('element_name'), array_values($fields))) {
+								$fields_list .= $section_field->get('label') . ', ';
+							}
+						}
+						$fields_list = trim($fields_list, ', ');
+						$col_fields = Widget::TableData($fields_list);
+					} else {
+						$col_fields = Widget::TableData(__('None'), 'inactive');
+					}
+					
+					if ($index) {
+						if($index['weighting'] == '') $index['weighting'] = 2;
+						$col_weighting = Widget::TableData($this->_weightings[$index['weighting']]);
+					} else {
+						$col_weighting = Widget::TableData(__('None'), 'inactive');
 					}
 					
 					$count_data = null;
@@ -287,13 +317,13 @@
 						$count_data = $count[0] . ' ' . (((int)$count[0] == 1) ? __('entry') : __('entries'));
 					}
 					else {
-						$count_data = 'No index';
+						$count_data = __('No index');
 						$count_class = 'inactive';
 					}
 					
 					$col_count = Widget::TableData($count_data, $count_class . ' count-column');
 					
-					$tableBody[] = Widget::TableRow(array($col_name, $col_count), 'section-' . $section->get('id'));
+					$tableBody[] = Widget::TableRow(array($col_name, $col_fields, $col_weighting, $col_count), 'section-' . $section->get('id'));
 
 				}
 			}
