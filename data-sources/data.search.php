@@ -118,7 +118,7 @@
 					case 3: $weight = 0.5; break; // low
 					case 4: $weight = 0.25; break; // lowest
 				}
-				if ($weight != 1) $weighting .= sprintf("WHEN e.section_id = %d THEN %d \n", $section_id, $weight);
+				$weighting .= sprintf("WHEN e.section_id = %d THEN %d \n", $section_id, $weight);
 			}
 			
 			$sql = sprintf(
