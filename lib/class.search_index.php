@@ -424,22 +424,26 @@ Class SearchIndex {
 		
 	}
 	
-	public static function countLogs() {
-		return (integer)Symphony::Database()->fetchVar('total', 0, sprintf("SELECT COUNT(*) AS `total` FROM (%s) as temp", self::getLogsSQL()));
+	public static function countLogs($filter_keywords) {
+		return (integer)Symphony::Database()->fetchVar('total', 0, sprintf("SELECT COUNT(*) AS `total` FROM (%s) as temp", self::getLogsSQL($filter_keywords)));
 	}
 	
-	private static function getLogsSQL() {
-		return "SELECT keywords, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` GROUP BY keywords, session_id";
+	private static function getLogsSQL($filter_keywords) {
+		$sql = sprintf(
+			"SELECT id, keywords, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id",
+			($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '')
+		);
+		return $sql;
 	}
 	
-	public function getLogs($sort_column='date', $sort_direction='desc', $page=1) {
+	public function getLogs($sort_column='date', $sort_direction='desc', $page=1, $filter_keywords) {
 		$page_size = (int)Symphony::Configuration()->get('pagination_maximum_rows', 'symphony');
 		$start = ($page - 1) * $page_size;
 		$sql = sprintf(
 			"%s
 			ORDER BY %s %s
 			LIMIT %d, %d",
-			self::getLogsSQL(),
+			self::getLogsSQL($filter_keywords),
 			$sort_column,
 			$sort_direction,
 			$start,

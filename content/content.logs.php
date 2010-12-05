@@ -12,6 +12,10 @@
 		}
 		
 		public function build($context) {
+			if (isset($_POST['filter']['keyword']) != '') {
+				redirect(Administration::instance()->getCurrentPageURL() . '?keywords=' . $_POST['keywords']);
+			}
+			
 			parent::build($context);
 		}
 		
@@ -36,16 +40,17 @@
 			
 			$sort_column = 'date';
 			$sort_order = 'desc';
+			$filter_keywords = '';
 			
 			if (isset($_GET['sort'])) $sort_column = $_GET['sort'];
 			if (isset($_GET['order'])) $sort_order = $_GET['order'];
+			if (isset($_GET['keywords'])) $filter_keywords = $_GET['keywords'];
 			
-			//echo $logs_sql;die;
-			$logs = SearchIndex::getLogs($sort_column, $sort_order, $page);
+			$logs = SearchIndex::getLogs($sort_column, $sort_order, $page, $filter_keywords);
 						
 			$start = max(1, (($page - 1) * $page_size));
 			$end = ($start == 1 ? $page_size : $start + count($logs));
-			$total = SearchIndex::countLogs();
+			$total = SearchIndex::countLogs($filter_keywords);
 			$pages = ceil($total / $page_size);
 			
 			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Logs'));
@@ -53,15 +58,22 @@
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
+			$filters = new XMLElement('div', NULL, array('class' => 'search-index-log-filters'));
+			$label = new XMLElement('label', 'Filter searches containing the keywords ' . Widget::Input('keywords', $filter_keywords)->generate());
+			$filters->appendChild($label);
+			$filters->appendChild(new XMLElement('input', NULL, array('type'=>'submit','value'=>'Filter','name'=>'filter[keyword]')));
+			
+			$this->Form->appendChild($filters);
+			
 			$tableHead = array();
 			$tableBody = array();
 			
 			$tableHead = array(
-				array(Widget::Anchor('Date', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=date&amp;order=' . (($sort_column == 'date' && $sort_order == 'desc') ? 'asc' : 'desc'), '', ($sort_column=='date' ? 'active' : '')), 'col'),
-				array(Widget::Anchor('Keywords', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=keywords&amp;order=' . (($sort_column == 'keywords' && $sort_order == 'asc') ? 'desc' : 'asc'), '', ($sort_column=='keywords' ? 'active' : '')), 'col'),
+				array(Widget::Anchor('Date', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=date&amp;order=' . (($sort_column == 'date' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='date' ? 'active' : '')), 'col'),
+				array(Widget::Anchor('Keywords', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=keywords&amp;order=' . (($sort_column == 'keywords' && $sort_order == 'asc') ? 'desc' : 'asc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='keywords' ? 'active' : '')), 'col'),
 				array('Adjusted Keywords', 'col'),
-				array(Widget::Anchor('Results', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=results&amp;order=' . (($sort_column == 'results' && $sort_order == 'desc') ? 'asc' : 'desc'), '', ($sort_column=='results' ? 'active' : '')), 'col'),
-				array(Widget::Anchor('Depth', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=depth&amp;order=' . (($sort_column == 'depth' && $sort_order == 'desc') ? 'asc' : 'desc'), '', ($sort_column=='depth' ? 'active' : '')), 'col'),
+				array(Widget::Anchor('Results', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=results&amp;order=' . (($sort_column == 'results' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='results' ? 'active' : '')), 'col'),
+				array(Widget::Anchor('Depth', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=depth&amp;order=' . (($sort_column == 'depth' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='depth' ? 'active' : '')), 'col'),
 				array('Sesion ID', 'col'),
 			);
 			
@@ -97,7 +109,7 @@
 					$row[] = Widget::TableData($adjusted, $adjusted_class);
 					$row[] = Widget::TableData($log['results']);
 					$row[] = Widget::TableData($log['depth']);
-					$row[] = Widget::TableData($log['session_id']);
+					$row[] = Widget::TableData($log['session_id'] . Widget::Input("items[{$log['id']}]", null, 'checkbox')->generate());
 					
 					$tableBody[] = Widget::TableRow($row);
 				}
@@ -131,7 +143,7 @@
 				## First
 				$li = new XMLElement('li');
 				if ($page > 1) {
-					$li->appendChild(Widget::Anchor(__('First'), Administration::instance()->getCurrentPageURL() . '?pg=1'));
+					$li->appendChild(Widget::Anchor(__('First'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
 					$li->setValue('First');
 				}
@@ -140,7 +152,7 @@
 				## Previous
 				$li = new XMLElement('li');
 				if ($page > 1) {
-					$li->appendChild(Widget::Anchor(__('&larr; Previous'), Administration::instance()->getCurrentPageURL(). '?pg=' . ($page - 1)));
+					$li->appendChild(Widget::Anchor(__('&larr; Previous'), Administration::instance()->getCurrentPageURL(). '?pg='.($page-1).'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
 					$li->setValue('&larr; Previous');
 				}				
@@ -158,7 +170,7 @@
 				## Next
 				$li = new XMLElement('li');				
 				if ($page < $pages) {
-					$li->appendChild(Widget::Anchor(__('Next &rarr;'), Administration::instance()->getCurrentPageURL(). '?pg=' . ($page + 1)));
+					$li->appendChild(Widget::Anchor(__('Next &rarr;'), Administration::instance()->getCurrentPageURL(). '?pg='.($page+1).'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
 					$li->setValue('Next &rarr;');
 				}				
@@ -167,7 +179,7 @@
 				## Last
 				$li = new XMLElement('li');
 				if ($page < $pages) {
-					$li->appendChild(Widget::Anchor(__('Last'), Administration::instance()->getCurrentPageURL(). '?pg=' . $pages));
+					$li->appendChild(Widget::Anchor(__('Last'), Administration::instance()->getCurrentPageURL(). '?pg='.$pages.'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
 					$li->setValue('Last');
 				}				
