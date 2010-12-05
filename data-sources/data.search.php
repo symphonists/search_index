@@ -61,7 +61,7 @@
 			$param_sections = Symphony::Configuration()->get('get-param-sections', 'search_index');
 			$param_page = Symphony::Configuration()->get('get-param-page', 'search_index');
 			
-			$keywords = $get[$param_keywords];
+			$keywords = trim($get[$param_keywords]);
 			$this->dsParamLIMIT = (isset($get[$param_per_page]) && (int)$get[$param_per_page] > 0) ? (int)$get[$param_per_page] : $this->dsParamLIMIT;
 			$sort = isset($get[$param_sort]) ? $get[$param_sort] : 'score';			
 			$direction = isset($get[$param_direction]) ? strtolower($get[$param_direction]) : 'desc';
