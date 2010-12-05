@@ -236,6 +236,7 @@
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
 			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Indexes'));
+			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index; which entries to index; and the weighting of the section in search results.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);

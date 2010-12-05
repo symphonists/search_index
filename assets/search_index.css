@@ -10,3 +10,7 @@ td.count-column {
 span#search-index-config {
 	display: none;
 }
+
+p.intro {
+	margin: 5px 19px;
+}
