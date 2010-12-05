@@ -229,19 +229,30 @@
 			// send entry IDs as Output Parameterss
 			$param_pool['ds-' . $this->dsParamROOTELEMENT] = $param_output;
 			
-			$log_sql = sprintf(
-				"INSERT INTO `tbl_search_index_logs`
-				(date, keywords, keywords_manipulated, sections, page, results, session_id)
-				VALUES('%s', '%s', '%s', '%s', %d, %d, '%s')",
-				date('Y-m-d H:i:s', time()),
-				Symphony::Database()->cleanValue($original_keywords),
-				Symphony::Database()->cleanValue($keywords),
-				Symphony::Database()->cleanValue(implode(',',$section_handles)),
-				$this->dsParamSTARTPAGE,
-				$total_entries,
-				session_id()
-			);
-			if ($this->log === TRUE) Symphony::Database()->query($log_sql);
+			if ($this->log === TRUE) {
+				
+				// has this search (keywords+sections) already been logged this session?
+				$already_logged = Symphony::Database()->fetch(sprintf(
+					"SELECT * FROM `tbl_search_index_logs` WHERE keywords='%s' AND sections='%s' AND session_id='%s'",
+					Symphony::Database()->cleanValue($original_keywords), Symphony::Database()->cleanValue(implode(',',$section_handles)), session_id()
+				));
+				
+				$log_sql = sprintf(
+					"INSERT INTO `tbl_search_index_logs`
+					(date, keywords, keywords_manipulated, sections, page, results, session_id)
+					VALUES('%s', '%s', '%s', '%s', %d, %d, '%s')",
+					date('Y-m-d H:i:s', time()),
+					Symphony::Database()->cleanValue($original_keywords),
+					Symphony::Database()->cleanValue($keywords),
+					Symphony::Database()->cleanValue(implode(',',$section_handles)),
+					$this->dsParamSTARTPAGE,
+					$total_entries,
+					session_id()
+				);
+				
+				Symphony::Database()->query($log_sql);
+				
+			}
 		
 			return $result;		
 

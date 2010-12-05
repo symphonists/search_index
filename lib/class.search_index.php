@@ -424,5 +424,30 @@ Class SearchIndex {
 		
 	}
 	
+	public static function countLogs() {
+		return (integer)Symphony::Database()->fetchVar('total', 0, sprintf("SELECT COUNT(*) AS `total` FROM (%s) as temp", self::getLogsSQL()));
+	}
+	
+	private static function getLogsSQL() {
+		return "SELECT keywords, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` GROUP BY keywords, session_id";
+	}
+	
+	public function getLogs($sort_column='date', $sort_direction='desc', $page=1) {
+		$page_size = (int)Symphony::Configuration()->get('pagination_maximum_rows', 'symphony');
+		$start = ($page - 1) * $page_size;
+		$sql = sprintf(
+			"%s
+			ORDER BY %s %s
+			LIMIT %d, %d",
+			self::getLogsSQL(),
+			$sort_column,
+			$sort_direction,
+			$start,
+			$page_size
+		);
+		return Symphony::Database()->fetch($sql);
+	}
+	
+	
 	
 }

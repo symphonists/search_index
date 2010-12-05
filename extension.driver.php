@@ -168,6 +168,11 @@
 					'name'		=> 'Synonyms',
 					'link'		=> '/synonyms/'
 				),
+				array(
+					'location'	=> 'Search Index',
+					'name'		=> 'Logs',
+					'link'		=> '/logs/'
+				),
 			);
 		}
 		
