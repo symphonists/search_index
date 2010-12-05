@@ -13,7 +13,6 @@
 		
 		public function build($context) {
 			if (isset($_POST['filter']['keyword']) != '') {
-				die;
 				redirect(Administration::instance()->getCurrentPageURL() . '?keywords=' . $_POST['keywords']);
 			}
 			
