@@ -367,4 +367,62 @@ Class SearchIndex {
 		$text = preg_quote($text, '/');
 	}
 	
+	/**
+	* Returns an array of all synonyms
+	*/
+	public static function getSynonyms() {
+		$synonyms = Symphony::Configuration()->get('synonyms', 'search_index');
+		//$indexes = preg_replace("/\\\/",'',$synonyms);
+		$synonyms = unserialize($synonyms);
+		if (!is_array($synonyms)) $synonyms = array();
+		uasort($synonyms, array('SearchIndex', 'sortSynonymsCallback'));
+		return $synonyms;
+	}
+	
+	/**
+	* Save all synonyms to config
+	*
+	* @param array $synonyms
+	*/
+	public static function saveSynonyms($synonyms) {
+		self::assert();
+		Symphony::Configuration()->set('synonyms', stripslashes(serialize($synonyms)), 'search_index');
+		self::$_context->saveConfig();
+	}
+	
+	private static function sortSynonymsCallback($a, $b) {
+		return strcmp($a['word'], $b['word']);
+	}
+	
+	public static function applySynonyms($keywords) {
+		
+		$keywords = explode(' ', $keywords);
+		$synonyms = self::getSynonyms();
+		
+		$keywords_manipulated = '';
+		
+		foreach($keywords as $word) {
+			$boolean_characters = array();
+			preg_match('/^(\-|\+)/', $word, $boolean_characters);
+			$word = strtolower(trim(preg_replace('/^(\-|\+)/', '', $word)));
+			
+			foreach($synonyms as $synonym) {
+				$synonym_terms = explode(',', $synonym['synonyms']);
+				foreach($synonym_terms as $s) {
+					$s = strtolower(trim($s));
+					// replace word with synonym replace word
+					if ($s == $word) $word = $synonym['word'];
+				}
+			}
+			
+			// add boolean character back in front of word
+			if (count($boolean_characters) > 0) $word = $boolean_characters[0] . $word;
+			$keywords_manipulated .= $word . ' ';
+		}
+		
+		return trim($keywords_manipulated);
+		
+	}
+	
+	
 }

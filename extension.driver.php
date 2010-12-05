@@ -13,7 +13,7 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.5',
+				'version'		=> '0.6',
 				'release-date'	=> '2010-12-05',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
@@ -81,6 +81,7 @@
 					  `id` int(11) NOT NULL auto_increment,
 					  `date` datetime NOT NULL,
 					  `keywords` varchar(255) default NULL,
+					  `keywords_manipulated` varchar(255) default NULL,				  
 					  `sections` varchar(255) default NULL,
 					  `page` int(11) NOT NULL,
 					  `results` int(11) default NULL,
@@ -96,6 +97,13 @@
 			}
 			
 			return true;
+		}
+		
+		public function update($previousVersion){
+			if(version_compare($previousVersion, '0.6', '<')){
+				Symphony::Database()->query("ALTER TABLE `tbl_search_index_logs` ADD `keywords_manipulated` varchar(255) default NULL");
+			}
+			return TRUE;
 		}
 
 		/**
@@ -151,9 +159,14 @@
 		public function fetchNavigation() {
 			return array(
 				array(
-					'location'	=> 'Blueprints',
-					'name'		=> 'Search Indexes',
+					'location'	=> 'Search Index',
+					'name'		=> 'Indexes',
 					'link'		=> '/indexes/'
+				),
+				array(
+					'location'	=> 'Search Index',
+					'name'		=> 'Synonyms',
+					'link'		=> '/synonyms/'
 				),
 			);
 		}

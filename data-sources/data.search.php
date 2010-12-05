@@ -121,6 +121,9 @@
 				$weighting .= sprintf("WHEN e.section_id = %d THEN %d \n", $section_id, $weight);
 			}
 			
+			$original_keywords = $keywords;
+			$keywords = SearchIndex::applySynonyms($keywords);
+			
 			$sql = sprintf(
 				"SELECT 
 					SQL_CALC_FOUND_ROWS 
@@ -228,9 +231,10 @@
 			
 			$log_sql = sprintf(
 				"INSERT INTO `tbl_search_index_logs`
-				(date, keywords, sections, page, results, session_id)
-				VALUES('%s', '%s', '%s', %d, %d, '%s')",
+				(date, keywords, keywords_manipulated, sections, page, results, session_id)
+				VALUES('%s', '%s', '%s', '%s', %d, %d, '%s')",
 				date('Y-m-d H:i:s', time()),
+				Symphony::Database()->cleanValue($original_keywords),
 				Symphony::Database()->cleanValue($keywords),
 				Symphony::Database()->cleanValue(implode(',',$section_handles)),
 				$this->dsParamSTARTPAGE,

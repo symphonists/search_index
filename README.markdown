@@ -1,5 +1,5 @@
 # Search Index
-Version: 0.5   
+Version: 0.6   
 Author: [Nick Dunn](http://nick-dunn.co.uk)  
 Build Date: 2010-11-05  
 Requirements: Symphony 2.1.2
@@ -10,10 +10,10 @@ Search Index provides an easy way to implement high performance fulltext searchi
 ## Usage
 1. Add the `search_index` folder to your Extensions directory
 2. Enable the extension from the Extensions page
-3. Configure indexes from Blueprints > Search Indexes
+3. Configure indexes from Search Index > Indexes
 
 ### Configuring section indexes
-After installation navigate to Blueprints > Search Indexes whereupon you will see a list of all sections in your site. Click on a name to configure the indexing criteria for that section. The index editor works the same as the Data Source editor:
+After installation navigate to Search Index > Indexes whereupon you will see a list of all sections in your site. Click on a name to configure the indexing criteria for that section. The index editor works the same as the Data Source editor:
 
 * Only values of fields selected from the **Included Elements** list are used for searching
 * **Index Filters** work exactly like Data Source filters. Use these to ensure only desired entries are indexed
@@ -88,7 +88,7 @@ For more information see <http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolea
 The common configuration options are discussed above. This is a full list of the variables you *should* see in your `config.php`. If some are missing it is because you have previously installed an earlier version of the extension. You can add these variables manually to make use of them.
 
 ### `re-index-per-page`
-Defaults to `20`. When manually re-indexing sections in the backend (Blueprints > Search Indexes, highlight rows an select "Re-index" from the With Selected dropdown) this is the number of entries per "page" that will be re-indexed at once. If you have 100 entries and `re-index-per-page` is `20` then you will have 5 pages of entries that will index, one after the other.
+Defaults to `20`. When manually re-indexing sections in the backend (Search Index > Indexes, highlight rows an select "Re-index" from the With Selected dropdown) this is the number of entries per "page" that will be re-indexed at once. If you have 100 entries and `re-index-per-page` is `20` then you will have 5 pages of entries that will index, one after the other.
 
 ### `re-index-refresh-rate`
 Defaults to `0.5` seconds. This is the "pause" between each cycle of indexing when manually re-indexing sections. If you have a high traffic site (or slow server) and you are worried that many consecutive page refreshes will use too much server power, then choose a higher number and there will be a longer pause between each page of indexing. The larger the number, the longer you have to wait during re-indexing. Set to `0` for super-quick times.
@@ -126,11 +126,25 @@ While this may decrease the number of results, the results will be more specific
 * `get-param-page` => `page`,
 * `indexes` => `a:1:{i:1;a:3:{s:6:\"fields\";a:2:{i:0;s:5:\"test2\";i:1;s:9:\"html-test\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}}`,
 
+## Synonyms
+
+Version 0.6 introduced the concept of synonyms, available by choosing Search Index > Synonyms. This allows you to configure word replacements so that commonly mis-spelt terms are automatically fixed, or terms with many alternative spellings or variations can be normalised to a single spelling. An example:
+
+* Replacement word `United Kingdom`
+* Synonyms: `uk, great britain, GB, united kingdoms`
+
+When a user searches for any of the synonym words, they will be replaced by the replacement word. So if a user searches for `countries in the UK` their search will actually use the phrase `counties in the United Kingdom`. 
+
+Synonym matches are case-insensitive.
 
 ## Known issues
 * you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
 
 ## Changelog
+
+### 0.6
+* extension now has its own backend menu rather than sitting under Blueprints
+* added support for synonyms, for example a user searching for "ds" could have the term expanded to "data source"
 
 ### 0.5
 * fixed bug whereby multiple slashes were added to serialised array in `config.php`
