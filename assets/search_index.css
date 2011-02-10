@@ -12,19 +12,39 @@ span#search-index-config {
 }
 
 p.intro {
-	margin: 5px 19px;
+	margin: 0 19px 10px 19px;
 	color: #887;
 }
 
 .search-index-log-filters {
 	margin: 0.5em 0 1.75em 0;
-    padding: 1em 19px;
+    padding: 0 19px 1em 19px;
     vertical-align: middle;
     border-bottom: 1px solid #e6e6e5;
 	-moz-box-shadow: 0 3px 8px #f5f5f4;
 	-webkit-box-shadow: 0 3px 8px #f5f5f4;
 }
 
+.search-index-log-filters label {
+	display: inline-block;
+	margin-bottom: 5px;
+}
+
+.search-index-log-filters input[type='text'] {
+	width: auto;
+	font-size: 100%;
+}
+
 .search-index-log-filters p {
 	margin-left: 0;
+	margin-bottom: 0;
+}
+
+h2 {
+	line-height: 1 !important;
+}
+
+h2 span.meta {
+	left: 21em;
+	position: absolute;
 }

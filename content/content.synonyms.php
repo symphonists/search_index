@@ -70,7 +70,7 @@
 
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
-			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/synonyms/\">" . __('Synonyms') . "</a>" . (!is_null($this->_synonym) ? ' &rsaquo; ' . $this->_synonym['word'] : ''));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/synonyms/\">" . __('Synonyms') . "</a>" . (!is_null($this->_synonym) ? ' <span class="meta">' . $this->_synonym['word'] . '</span>' : ''));
 			
 			$fieldset = new XMLElement('fieldset');
 			$fieldset->setAttribute('class', 'settings');
@@ -165,7 +165,8 @@
 			
 			$table = Widget::Table(
 				Widget::TableHead($tableHead), null, 
-				Widget::TableBody($tableBody)
+				Widget::TableBody($tableBody),
+				'selectable'
 			);
 			
 			$this->Form->appendChild($table);

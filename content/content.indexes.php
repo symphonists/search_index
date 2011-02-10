@@ -16,7 +16,7 @@
 			
 			$this->_uri = URL . '/symphony/extension/search_index';
 			
-			$sectionManager = new SectionManager($this->_Parent);			
+			$sectionManager = new SectionManager(Administration::instance());			
 			$this->_sections = $sectionManager->fetch(NULL, 'ASC', 'name');
 			
 			$this->_indexes = SearchIndex::getIndexes();
@@ -70,7 +70,7 @@
 						
 					case 're-index':
 						foreach ($checked as $section_id) {
-							SearchIndex::deleteIndexBySection($section_id);
+							#SearchIndex::deleteIndexBySection($section_id);
 						}
 						redirect("{$this->_uri}/indexes/?section=" . join(',', $checked));
 						break;
@@ -107,7 +107,7 @@
 			
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes') . ' &ndash; ' . $this->_section->get('name'));
-			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> &rsaquo; " . $this->_section->get('name'));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> <span class='meta'>" . $this->_section->get('name') . "</span>");
 			
 			$fields = array('fields' => $this->_section->fetchFields(), 'section' => $this->_section);
 			
@@ -169,7 +169,7 @@
 				
 			$div = new XMLElement('div');
 			$div->setAttribute('class', 'contextual ' . $fields['section']->get('id'));
-			$h3 = new XMLElement('h3', __('Filter %s by', array($fields['section']->get('name'))));
+			$h3 = new XMLElement('p', __('Filter %s by', array($fields['section']->get('name'))), array('class' => 'label'));
 			$h3->setAttribute('class', 'label');
 			$div->appendChild($h3);
 			
@@ -224,7 +224,7 @@
 				Widget::Input('action[save]',
 					__('Save Changes'),
 					'submit', array(
-						'accesskey'		=> 's'
+						'accesskey' => 's'
 					)
 				)
 			);
@@ -237,7 +237,7 @@
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
 			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Indexes'));
-			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index; which entries to index; and the weighting of the section in search results.'), array('class' => 'intro')));
+			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index, which entries to index, and the weighting of the section in search results.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
@@ -304,7 +304,8 @@
 					$count_class = null;
 					
 					if (isset($_GET['section']) && in_array($section->get('id'), $re_index) && in_array($section->get('id'), array_keys($this->_indexes))) {
-						$count_data = '<span class="to-re-index" id="section-'.$section->get('id').'">Waiting to re-index...</span>';
+						SearchIndex::deleteIndexBySection($section_id);
+						$count_data = '<span class="to-re-index" id="section-'.$section->get('id').'">' . __('Waiting to re-index...') . '</span>';
 					}
 					else if (isset($this->_indexes[$section->get('id')])) {
 						$count = Symphony::Database()->fetchCol(
@@ -330,7 +331,8 @@
 			
 			$table = Widget::Table(
 				Widget::TableHead($tableHead), null, 
-				Widget::TableBody($tableBody)
+				Widget::TableBody($tableBody),
+				'selectable'
 			);
 			
 			$this->Form->appendChild($table);
@@ -339,7 +341,7 @@
 				'span',
 				json_encode(
 					array_merge(
-						$this->_Parent->Configuration->get('search_index'),
+						Symphony::Configuration()->get('search_index'),
 						array(
 							'extension_root_url' => $this->_uri
 						)
@@ -354,8 +356,8 @@
 			
 			$options = array(
 				array(null, false, 'With Selected...'),
+				array('re-index', false, 'Re-index Entries'),
 				array('delete', false, 'Delete'),
-				array('re-index', false, 'Re-index Entries')
 			);
 			
 			$actions->appendChild(Widget::Select('with-selected', $options));

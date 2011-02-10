@@ -8,21 +8,13 @@ Class SearchIndex {
 	private static $_where = NULL;
 	private static $_joins = NULL;
 	
-	private static $_context = NULL;
-	
 	/**
 	* Set up static members
 	*/
 	private function assert() {
-
-		$mode = (isset($_GET['mode']) && strtolower($_GET['mode']) == 'administration' 
-				? 'administration' 
-				: 'frontend');
-		
-		self::$_context = ($mode == 'administration' ? Administration::instance() : Frontend::instance());
-		
-		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(self::$_context);
-		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(self::$_context, NULL, FALSE);
+		require_once(TOOLKIT . '/class.entrymanager.php');
+		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(Symphony::Engine());
+		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(Symphony::Engine(), NULL, FALSE);
 	}
 	
 	/**
@@ -43,7 +35,7 @@ Class SearchIndex {
 	public static function saveIndexes($indexes) {
 		self::assert();
 		Symphony::Configuration()->set('indexes', stripslashes(serialize($indexes)), 'search_index');
-		self::$_context->saveConfig();
+		Symphony::Engine()->saveConfig();
 	}
 	
 	/**
@@ -387,7 +379,7 @@ Class SearchIndex {
 	public static function saveSynonyms($synonyms) {
 		self::assert();
 		Symphony::Configuration()->set('synonyms', stripslashes(serialize($synonyms)), 'search_index');
-		self::$_context->saveConfig();
+		Symphony::Engine()->saveConfig();
 	}
 	
 	private static function sortSynonymsCallback($a, $b) {
