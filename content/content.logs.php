@@ -41,7 +41,7 @@
 			$total = SearchIndex::countLogs($filter_keywords);
 			$pages = ceil($total / $page_size);
 			
-			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Logs'));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Logs'));
 			
 			$stats = array(
 				'unique-users' => SearchIndex::getStatsCount('unique-users', $filter_keywords),

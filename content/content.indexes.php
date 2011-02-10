@@ -107,7 +107,7 @@
 			
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes') . ' &ndash; ' . $this->_section->get('name'));
-			$this->appendSubheading(__('Search Index') . " &raquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> &raquo; " . $this->_section->get('name'));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> &rsaquo; " . $this->_section->get('name'));
 			
 			$fields = array('fields' => $this->_section->fetchFields(), 'section' => $this->_section);
 			
@@ -236,7 +236,7 @@
 			$this->setPageType('table');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
-			$this->appendSubheading(__('Search Index') . " &raquo; " . __('Indexes'));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Indexes'));
 			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index; which entries to index; and the weighting of the section in search results.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);

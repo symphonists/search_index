@@ -70,7 +70,7 @@
 
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
-			$this->appendSubheading(__('Search Index') . " &raquo; <a href=\"{$this->_uri}/synonyms/\">" . __('Synonyms') . "</a>" . (!is_null($this->_synonym) ? ' &raquo; ' . $this->_synonym['word'] : ''));
+			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/synonyms/\">" . __('Synonyms') . "</a>" . (!is_null($this->_synonym) ? ' &rsaquo; ' . $this->_synonym['word'] : ''));
 			
 			$fieldset = new XMLElement('fieldset');
 			$fieldset->setAttribute('class', 'settings');
@@ -128,7 +128,7 @@
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
 			$this->appendSubheading(
-				__('Search Index') . " &raquo; " . __('Synonyms') . 
+				__('Search Index') . " &rsaquo; " . __('Synonyms') . 
 				Widget::Anchor(__('Create New'), Administration::instance()->getCurrentPageURL().'edit/', __('Create New'), 'create button')->generate()
 			);
 			$this->Form->appendChild(new XMLElement('p', __('Configure synonym expansion, so that common misspellings or variations of phrase can be normalised to a single phrase.'), array('class' => 'intro')));
