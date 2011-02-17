@@ -9,7 +9,7 @@
 		*/
 		function __construct(&$parent){
 			parent::__construct($parent);
-			$this->_name = 'Search Index';
+			$this->_name = 'Search Index Filter';
 			$this->_required = FALSE;			
 			$this->set('hide', 'no');
 		}
@@ -50,9 +50,9 @@
 			$fields['field_id'] = $id;
 			
 			// delete existing field configuration
-			$this->_engine->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
+			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
 			// save new field configuration
-			return $this->_engine->Database->insert($fields, 'tbl_fields_' . $this->handle());
+			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
 		}
 
 		/**
@@ -91,7 +91,7 @@
 		* Create table to hold field instance's values
 		*/		
 		public function createTable(){
-			return $this->Database->query(			
+			return Symphony::Database()->query(			
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `entry_id` int(11) unsigned NOT NULL,

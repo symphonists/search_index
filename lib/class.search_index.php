@@ -124,7 +124,6 @@ Class SearchIndex {
 		if (!is_array($entry)) $entry = array($entry);
 		
 		// create a DS and filter on System ID of the current entry to build the entry's XML			
-		#$ds = new EntryXMLDataSource(Administration::instance(), NULL, FALSE);
 		self::$_entry_xml_datasource->dsParamINCLUDEDELEMENTS = $indexed_sections[$section]['fields'];
 		self::$_entry_xml_datasource->dsParamFILTERS['id'] = implode(',',$entry);
 		self::$_entry_xml_datasource->dsSource = (string)$section;

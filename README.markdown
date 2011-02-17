@@ -1,11 +1,12 @@
 # Search Index
-Version: 0.6.4    
-Author: [Nick Dunn](http://nick-dunn.co.uk)  
-Build Date: 2010-11-05  
-Requirements: Symphony 2.1.2
+
+* Version: 0.6.5
+* Author: [Nick Dunn](http://nick-dunn.co.uk)
+* Build Date: 2011-02-17
+* Requirements: Symphony 2.2
 
 ## Description
-Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index Field that allows keyword filtering in Data Sources, or the included Search Index Data Source for searching multiple sections at once.
+Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index Field that allows keyword filtering in data sources, or the included Search Index data source for searching multiple sections at once.
 
 ## Usage
 1. Add the `search_index` folder to your Extensions directory
@@ -13,10 +14,10 @@ Search Index provides an easy way to implement high performance fulltext searchi
 3. Configure indexes from Search Index > Indexes
 
 ### Configuring section indexes
-After installation navigate to Search Index > Indexes whereupon you will see a list of all sections in your site. Click on a name to configure the indexing criteria for that section. The index editor works the same as the Data Source editor:
+After installation navigate to Search Index > Indexes whereupon you will see a list of all sections in your site. Click on a name to configure the indexing criteria for that section. The index editor works the same as the data source editor:
 
 * Only values of fields selected from the **Included Elements** list are used for searching
-* **Index Filters** work exactly like Data Source filters. Use these to ensure only desired entries are indexed
+* **Index Filters** work exactly like data source filters. Use these to ensure only desired entries are indexed
 
 Once saved the "Index" column will display "0 entries" on the Search Indexes page. Select the row and choose "Re-index Entries" from the With Selected menu. When the page reloads you will see the index being rebuilt, one page of results at a time.
 
@@ -24,17 +25,17 @@ Multiple sections can be selected at once for re-indexing.
 
 The page size and speed of refresh can be modified by editing the `re-index-per-page` and `re-index-refresh-rate` variables in your Symphony `config.php`.
 
-### Fulltext search in a Data Source (single section)
-Adding a keyword search to an existing Data Source is extremely easy. Start by adding the Search Index field to your section. This allows you to add a filter on this field when building a Data Source. For example:
+### Fulltext search in a data source (single section)
+Adding a keyword search to an existing data source is extremely easy. Start by adding the Search Index Filter field to your section. This allows you to add a filter on this field when building a data source. For example:
 
 * add the Search Index to your section
-* modify your Data Source to filter this field with a filter value of `{$url-keywords}`
-* attach the Data Source to a page and access like `/my-page/?keywords=foo+bar`
+* modify your data source to filter this field with a filter value of `{$url-keywords}`
+* attach the data source to a page and access like `/my-page/?keywords=foo+bar`
 
 The filtered entries returned will only be those that contain the word "foo" in their text index.
 
 ### Fulltext search across multiple Sections
-A full-site search can be achieved using the custom Search Index Data Source included with this extension. Attach this Data Source to a page and invoke it using the following GET parameters:
+A full-site search can be achieved using the custom Search Index data source included with this extension. Attach this data source to a page and invoke it using the following GET parameters:
 
 * `keywords` the string to search on e.g. `foo bar`
 * `sort` either `id` (entry ID), `date` (entry creation date), `score` (relevance) or `score-recency` (relevance with a higher weighting for newer entries) (defaults to `score`)
@@ -59,7 +60,7 @@ The default is to use GET parameters such as `/search/?keywords=foo+bar&page=2` 
 
 #### Example XML
 
-The XML returned from this Data Source looks like this:
+The XML returned from this data source looks like this:
 
 	<search keywords="foo+bar" sort="score" direction="desc">
 		<pagination total-entries="5" total-pages="1" entries-per-page="20" current-page="1" />
@@ -74,7 +75,7 @@ The XML returned from this Data Source looks like this:
 		<entry id="3" section="comments" />
 	</search>
 
-This in itself is not enough to render a results page. To do so, use the `$ds-search` Output Parameter created by this Data Source to filter by System ID in other Data Sources. In the example above you would create a new Data Source each for Articles and Comments, filtering System ID by the `$ds-search` parameter. Use XSLT to iterate over the `<entry ... />` elements above, and cross-reference with the matching entries from the Articles and Comments Data Sources.
+This in itself is not enough to render a results page. To do so, use the `$ds-search` Output Parameter created by this data source to filter by System ID in other data sources. In the example above you would create a new data source each for Articles and Comments, filtering System ID by the `$ds-search` parameter. Use XSLT to iterate over the `<entry ... />` elements above, and cross-reference with the matching entries from the Articles and Comments data sources.
 
 ## Weighting
 We all know that all sections are equal, only some are more equal than others ;-) You can give higher or lower weighting to results from certain sections, by issuing them a weighting when you configure their Search Index. The default is `Medium` (no weighting), but if you want more chance of entries from your section appearing higher up the search results, choose `High`; or for even more prominence `Highest`. The opposite is true: to bury entries lower down the results then choose `Low` or `Lowest`. This weighting has the effect of doubling/quadrupling or halving/quartering the original "relevance" score calculated by the search.
@@ -150,7 +151,7 @@ Column descriptions:
 * `Depth` is the maximum number of search results pages the user clicked through
 
 ## Known issues
-* you can not order results by relevance score when using a single Data Source. This is only available when using the custom Search Index Data Source
+* you can not order results by relevance score when using a single data source. This is only available when using the custom Search Index data source
 
 ## Changelog
 
