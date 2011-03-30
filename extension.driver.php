@@ -58,7 +58,7 @@
 			try {
 				
 				Symphony::Database()->query(
-				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index` (
+				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index_filter` (
 					  `id` int(11) unsigned NOT NULL auto_increment,
 					  `field_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
@@ -93,6 +93,7 @@
 				
 			}
 			catch (Exception $e){
+				#var_dump($e);die;
 				return false;
 			}
 			
