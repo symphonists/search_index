@@ -139,8 +139,8 @@
 			$tableHead = array();
 			$tableBody = array();
 			
-			$tableHead[] = array('Word', 'col');
-			$tableHead[] = array('Synonyms', 'col');
+			$tableHead[] = array(__('Word'), 'col');
+			$tableHead[] = array(__('Synonyms'), 'col');
 			
 			if (!is_array($this->_synonyms) or empty($this->_synonyms)) {
 				$tableBody = array(

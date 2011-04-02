@@ -185,18 +185,18 @@
 		public function fetchNavigation() {
 			return array(
 				array(
-					'location'	=> 'Search Index',
-					'name'		=> 'Indexes',
+					'location'	=> __('Search Index'),
+					'name'		=> __('Indexes'),
 					'link'		=> '/indexes/'
 				),
 				array(
-					'location'	=> 'Search Index',
-					'name'		=> 'Synonyms',
+					'location'	=> __('Search Index'),
+					'name'		=> __('Synonyms'),
 					'link'		=> '/synonyms/'
 				),
 				array(
-					'location'	=> 'Search Index',
-					'name'		=> 'Logs',
+					'location'	=> __('Search Index'),
+					'name'		=> __('Logs'),
 					'link'		=> '/logs/'
 				),
 			);

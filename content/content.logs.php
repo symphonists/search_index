@@ -54,11 +54,11 @@
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
 			$filters = new XMLElement('div', NULL, array('class' => 'search-index-log-filters'));
-			$label = new XMLElement('label', 'Filter searches containing the keywords ' . Widget::Input('keywords', $filter_keywords)->generate());
+			$label = new XMLElement('label', __('Filter searches containing the keywords ') . Widget::Input('keywords', $filter_keywords)->generate());
 			$filters->appendChild($label);
-			$filters->appendChild(new XMLElement('input', NULL, array('type'=>'submit','value'=>'Filter','name'=>'filter[keyword]')));
+			$filters->appendChild(new XMLElement('input', NULL, array('type'=>'submit','value'=>__('Filter'),'name'=>'filter[keyword]')));
 			
-			$filters->appendChild(new XMLElement('p', '<strong>' . $stats['unique-searches'] . '</strong> unique searches from <strong>' . __($stats['unique-users'] . '</strong> unique users via <strong>' . $stats['unique-terms'] . '</strong> distinct search terms. Each search yielded an average of <strong>' . $stats['average-results'] . '</strong> results.'), array('class' => 'intro')));
+			$filters->appendChild(new XMLElement('p', sprintf(__('<strong>%d</strong> unique searches from <strong>%d</strong> unique users via <strong>%d</strong> distinct search terms. Each search yielded an average of <strong>%d</strong> results.'), $stats['unique-searches'], $stats['unique-users'], $stats['unique-terms'], $stats['average-results']), array('class' => 'intro')));
 			
 			$this->Form->appendChild($filters);
 			
@@ -66,12 +66,12 @@
 			$tableBody = array();
 			
 			$tableHead = array(
-				array(Widget::Anchor('Date', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=date&amp;order=' . (($sort_column == 'date' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='date' ? 'active' : '')), 'col'),
-				array(Widget::Anchor('Keywords', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=keywords&amp;order=' . (($sort_column == 'keywords' && $sort_order == 'asc') ? 'desc' : 'asc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='keywords' ? 'active' : '')), 'col'),
-				array('Adjusted Keywords', 'col'),
-				array(Widget::Anchor('Results', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=results&amp;order=' . (($sort_column == 'results' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='results' ? 'active' : '')), 'col'),
-				array(Widget::Anchor('Depth', Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=depth&amp;order=' . (($sort_column == 'depth' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='depth' ? 'active' : '')), 'col'),
-				array('Sesion ID', 'col'),
+				array(Widget::Anchor(__('Date'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=date&amp;order=' . (($sort_column == 'date' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='date' ? 'active' : '')), 'col'),
+				array(Widget::Anchor(__('Keywords'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=keywords&amp;order=' . (($sort_column == 'keywords' && $sort_order == 'asc') ? 'desc' : 'asc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='keywords' ? 'active' : '')), 'col'),
+				array(__('Adjusted Keywords'), 'col'),
+				array(Widget::Anchor(__('Results'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=results&amp;order=' . (($sort_column == 'results' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='results' ? 'active' : '')), 'col'),
+				array(Widget::Anchor(__('Depth'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort=depth&amp;order=' . (($sort_column == 'depth' && $sort_order == 'desc') ? 'asc' : 'desc') . '&amp;keywords=' . $filter_keywords, '', ($sort_column=='depth' ? 'active' : '')), 'col'),
+				array(__('Session ID'), 'col'),
 			);
 			
 			if (!is_array($logs) or empty($logs)) {

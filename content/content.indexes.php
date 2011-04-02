@@ -245,10 +245,10 @@
 			$tableHead = array();
 			$tableBody = array();
 			
-			$tableHead[] = array('Section', 'col');
-			$tableHead[] = array('Fields', 'col');
-			$tableHead[] = array('Weighting', 'col');
-			$tableHead[] = array('Index Size', 'col');
+			$tableHead[] = array(__('Section'), 'col');
+			$tableHead[] = array(__('Fields'), 'col');
+			$tableHead[] = array(__('Weighting'), 'col');
+			$tableHead[] = array(__('Index Size'), 'col');
 			
 			if (!is_array($this->_sections) or empty($this->_sections)) {
 				$tableBody = array(
