@@ -50,7 +50,7 @@ var SiteIndex = {
 				// proceed to next section
 				else {					
 					setTimeout(function() {
-						span.text(total_entries + ' entries').removeClass('re-index');
+						span.text(total_entries + ' ' + ((total_entries == 1) ? 'entry' : 'entries')).removeClass('re-index');
 						self.progress++;
 						self.indexNextSection();
 					}, (self.config['re-index-refresh-rate'] * 1000));

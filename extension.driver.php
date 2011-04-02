@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.6.5',
-				'release-date'	=> '2011-02-17',
+				'version'		=> '0.7alpha',
+				'release-date'	=> '2011-04-03',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
@@ -32,17 +32,21 @@
 			// refresh frequency when rebuilding index
 			Symphony::Configuration()->set('re-index-refresh-rate', 0.5, 'search_index');
 			
-			// append wildcard * to the end of search phrases (reduces performance, increases matches)
-			Symphony::Configuration()->set('append-wildcard', 'no', 'search_index');
-			
-			// append + to the start of search phrases (makes all words required)
-			Symphony::Configuration()->set('append-all-words-required', 'yes', 'search_index');
-			
 			// default sections if none specifed in URL
 			Symphony::Configuration()->set('default-sections', '', 'search_index');
 			
-			// default sections if none specifed in URL
+			// length of highlighted excerpt in results
 			Symphony::Configuration()->set('excerpt-length', 250, 'search_index');
+			// minimum word length to index (must be more than 1)
+			Symphony::Configuration()->set('min-word-length', 3, 'search_index');
+			// maximum word length to index (much be less than 255)
+			Symphony::Configuration()->set('max-word-length', 30, 'search_index');
+			// also search for word stems (increases number of results found)
+			Symphony::Configuration()->set('stem-words', 'yes', 'search_index');
+			// automatically build entry XML in the search data source (slower)
+			Symphony::Configuration()->set('build-entries', 'no', 'search_index');
+			// query type ('like' or 'fulltext')
+			Symphony::Configuration()->set('query-mode', 'like', 'search_index');
 			
 			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
@@ -91,6 +95,25 @@
 					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 				);
 				
+				Symphony::Database()->query(
+					"CREATE TABLE `sym_search_index_keywords` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `keyword` varchar(255) default NULL,
+					  PRIMARY KEY  (`id`),
+					  FULLTEXT KEY `keyword` (`keyword`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
+				Symphony::Database()->query(
+					"CREATE TABLE `sym_search_index_entry_keywords` (
+					  `entry_id` int(11) default NULL,
+					  `keyword_id` int(11) default NULL,
+					  `frequency` int(11) default NULL,
+					  KEY `entry_id` (`entry_id`),
+					  KEY `keyword_id` (`keyword_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
 			}
 			catch (Exception $e){
 				#var_dump($e);die;
@@ -119,6 +142,8 @@
 				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_fields_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_search_index_logs`");
+				Symphony::Database()->query("DROP TABLE `sym_search_index_keywords`");
+				Symphony::Database()->query("DROP TABLE `sym_search_index_entry_keywords`");
 			}
 			catch(Exception $e){
 				return false;

@@ -12,6 +12,7 @@ Class ReindexDataSource extends Datasource{
 	public $dsParamREDIRECTONEMPTY = 'no';
 	#public $dsParamSORT = 'system:id';
 	public $dsParamSTARTPAGE = '1';
+	public $dsParamPAGINATERESULTS = 'yes';
 	
 	public $dsParamINCLUDEDELEMENTS = array('system:pagination');
 	public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
@@ -27,7 +28,7 @@ Class ReindexDataSource extends Datasource{
 	public function grab(&$param_pool){
 		
 		if (isset($_GET['page'])) $this->dsParamSTARTPAGE = $_GET['page'];			
-		$this->dsParamLIMIT = $this->_Parent->Configuration->get('re-index-per-page', 'search_index');
+		$this->dsParamLIMIT = Symphony::Configuration()->get('re-index-per-page', 'search_index');
 		
 		$result = new XMLElement($this->dsParamROOTELEMENT);
 		

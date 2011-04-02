@@ -8,6 +8,8 @@ Class SearchIndex {
 	private static $_where = NULL;
 	private static $_joins = NULL;
 	
+	private static $_keyword_cache = array();
+	
 	/**
 	* Set up static members
 	*/
@@ -159,6 +161,7 @@ Class SearchIndex {
 	* @param string $data
 	*/
 	public function saveEntryIndex($entry_id, $section_id, $data) {
+		// stores the full entry text
 		Symphony::Database()->insert(
 			array(
 				'entry_id' => $entry_id,
@@ -167,6 +170,69 @@ Class SearchIndex {
 			),
 			'tbl_search_index'
 		);
+		// stores the entry text keywords, one row per word
+		self::saveEntryKeywords($entry_id, $data);
+	}
+	
+	public function saveEntryKeywords($entry_id, $data) {
+		
+		require_once(EXTENSIONS . '/search_index/lib/strip_punctuation.php');
+		
+		// remove as much crap as possible
+		$data = strip_tags($data);
+		$data = strtolower($data);
+		$data = utf8_encode($data);
+		$data = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $data);
+	    $data = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $data);
+		$data = strip_punctuation($data);
+		
+		$words = explode(' ', trim($data));
+		$words = array_unique($words);
+		
+		// store words to log this time around
+		$log_keywords = array();
+		
+		foreach($words as $word) {
+			$word = trim($word);
+			
+			// exclude words that are too short or too long
+			if(strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
+				continue;
+			}
+			
+			// have we already parsed this word in this process?
+			if(isset(self::$_keyword_cache[$word])) {
+				$log_keywords[$word] = self::$_keyword_cache[$word];
+				continue;
+			}
+			
+			// does this keyword exist in the database already? get its ID
+			$keyword_id = Symphony::Database()->fetchVar('id', 0, sprintf("SELECT id FROM `tbl_search_index_keywords` WHERE `keyword` = '%s'", Symphony::Database()->cleanValue($word)));
+			if(is_null($keyword_id)) {
+				// if it doesn't exist, we need to insert and get its ID
+				Symphony::Database()->insert(array('keyword' => $word), 'tbl_search_index_keywords');
+				$keyword_id = Symphony::Database()->getInsertID();
+			}
+			
+			// cache the word
+			self::$_keyword_cache[$word] = $keyword_id;
+			$log_keywords[$word] = $keyword_id;
+		}
+		
+		// no words to log
+		if(count($log_keywords) == 0) return;
+		
+		// delete keyword associations for this entry
+		Symphony::Database()->query(sprintf("DELETE FROM `tbl_search_index_entry_keywords` WHERE `entry_id` = %d", $entry_id));
+		
+		// add all the new word associations in one batch (MUCH faster than an INSERT per word!)
+		$insert = "INSERT INTO tbl_search_index_entry_keywords (entry_id, keyword_id, frequency) VALUES ";
+		foreach($log_keywords as $keyword => $keyword_id) {
+			$insert .= sprintf("(%d, %d, '%s'),", $entry_id, $keyword_id, substr_count($data, $keyword));
+		}
+		$insert = trim($insert, ',');
+		Symphony::Database()->query($insert);
+		
 	}
 	
 	/**
