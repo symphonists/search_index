@@ -21,11 +21,90 @@
 				'description' => 'Index text content of entries for efficient fulltext search.'
 			);
 		}
+		
+		private function createTables() {
+			
+			try {
+				
+				Symphony::Database()->query(
+				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index_filter` (
+					  `id` int(11) unsigned NOT NULL auto_increment,
+					  `field_id` int(11) unsigned NOT NULL,
+				  PRIMARY KEY  (`id`),
+				  KEY `field_id` (`field_id`))");
+				
+				Symphony::Database()->query(
+					"CREATE TABLE IF NOT EXISTS `tbl_search_index` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `entry_id` int(11) NOT NULL,
+					  `section_id` int(11) NOT NULL,
+					  `data` text,
+					  PRIMARY KEY (`id`),
+					  KEY `entry_id` (`entry_id`),
+					  FULLTEXT KEY `data` (`data`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
+				);
+				
+				Symphony::Database()->query(
+					"CREATE TABLE IF NOT EXISTS `tbl_search_index_logs` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `date` datetime NOT NULL,
+					  `keywords` varchar(255) default NULL,
+					  `keywords_manipulated` varchar(255) default NULL,				  
+					  `sections` varchar(255) default NULL,
+					  `page` int(11) NOT NULL,
+					  `results` int(11) default NULL,
+					  `session_id` varchar(255) default NULL,
+					  PRIMARY KEY  (`id`),
+					  FULLTEXT KEY `keywords` (`keywords`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
+				Symphony::Database()->query(
+					"CREATE TABLE IF NOT EXISTS `sym_search_index_keywords` (
+					  `id` int(11) NOT NULL auto_increment,
+					  `keyword` varchar(255) default NULL,
+					  PRIMARY KEY  (`id`),
+					  FULLTEXT KEY `keyword` (`keyword`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
+				Symphony::Database()->query(
+					"CREATE TABLE IF NOT EXISTS `sym_search_index_entry_keywords` (
+					  `entry_id` int(11) default NULL,
+					  `keyword_id` int(11) default NULL,
+					  `frequency` int(11) default NULL,
+					  KEY `entry_id` (`entry_id`),
+					  KEY `keyword_id` (`keyword_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
+				
+			}
+			catch (Exception $e){
+				#var_dump($e);die;
+				return FALSE;
+			}
+			
+			return TRUE;
+			
+		}
 
 		/**
 		* Set up configuration defaults and database tables
 		*/		
 		public function install(){
+			
+			$this->createTables();
+			
+			/*
+			
+			'min-word-length' => '3',
+			'max-word-length' => '30',
+			'stem-words' => 'yes',
+			'mode' => 'like',
+			'build-entries' => 'no',
+			'log-keywords' => 'yes',
+				*/
 			
 			// number of entries per page when rebuilding index
 			Symphony::Configuration()->set('re-index-per-page', 20, 'search_index');
@@ -46,7 +125,9 @@
 			// automatically build entry XML in the search data source (slower)
 			Symphony::Configuration()->set('build-entries', 'no', 'search_index');
 			// query type ('like' or 'fulltext')
-			Symphony::Configuration()->set('query-mode', 'like', 'search_index');
+			Symphony::Configuration()->set('mode', 'like', 'search_index');
+			// log searches for analysis
+			Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
 			
 			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
@@ -59,74 +140,31 @@
 			
 			Administration::instance()->saveConfig();
 			
-			try {
-				
-				Symphony::Database()->query(
-				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index_filter` (
-					  `id` int(11) unsigned NOT NULL auto_increment,
-					  `field_id` int(11) unsigned NOT NULL,
-				  PRIMARY KEY  (`id`),
-				  KEY `field_id` (`field_id`))");
-				
-				Symphony::Database()->query(
-					"CREATE TABLE `tbl_search_index` (
-					  `id` int(11) NOT NULL auto_increment,
-					  `entry_id` int(11) NOT NULL,
-					  `section_id` int(11) NOT NULL,
-					  `data` text,
-					  PRIMARY KEY (`id`),
-					  KEY `entry_id` (`entry_id`),
-					  FULLTEXT KEY `data` (`data`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
-				);
-				
-				Symphony::Database()->query(
-					"CREATE TABLE `tbl_search_index_logs` (
-					  `id` int(11) NOT NULL auto_increment,
-					  `date` datetime NOT NULL,
-					  `keywords` varchar(255) default NULL,
-					  `keywords_manipulated` varchar(255) default NULL,				  
-					  `sections` varchar(255) default NULL,
-					  `page` int(11) NOT NULL,
-					  `results` int(11) default NULL,
-					  `session_id` varchar(255) default NULL,
-					  PRIMARY KEY  (`id`),
-					  FULLTEXT KEY `keywords` (`keywords`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
-				);
-				
-				Symphony::Database()->query(
-					"CREATE TABLE `sym_search_index_keywords` (
-					  `id` int(11) NOT NULL auto_increment,
-					  `keyword` varchar(255) default NULL,
-					  PRIMARY KEY  (`id`),
-					  FULLTEXT KEY `keyword` (`keyword`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
-				);
-				
-				Symphony::Database()->query(
-					"CREATE TABLE `sym_search_index_entry_keywords` (
-					  `entry_id` int(11) default NULL,
-					  `keyword_id` int(11) default NULL,
-					  `frequency` int(11) default NULL,
-					  KEY `entry_id` (`entry_id`),
-					  KEY `keyword_id` (`keyword_id`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
-				);
-				
-			}
-			catch (Exception $e){
-				#var_dump($e);die;
-				return false;
-			}
+			
 			
 			return true;
 		}
 		
 		public function update($previousVersion){
+			
 			if(version_compare($previousVersion, '0.6', '<')){
 				Symphony::Database()->query("ALTER TABLE `tbl_search_index_logs` ADD `keywords_manipulated` varchar(255) default NULL");
 			}
+			
+			if(version_compare($previousVersion, '0.6.5', '<')){
+				
+				$this->createTables();
+				
+				Symphony::Configuration()->set('min-word-length', 3, 'search_index');
+				Symphony::Configuration()->set('max-word-length', 30, 'search_index');
+				Symphony::Configuration()->set('stem-words', 'yes', 'search_index');
+				Symphony::Configuration()->set('build-entries', 'no', 'search_index');
+				Symphony::Configuration()->set('mode', 'like', 'search_index');
+				Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
+				Administration::instance()->saveConfig();
+				
+			}
+			
 			return TRUE;
 		}
 

@@ -337,7 +337,6 @@
                 if (is_null($m) OR self::m($substr) > $m) {
                     $str = $substr . $repl;
                 }
-
                 return true;
             }
 

@@ -493,7 +493,7 @@ Class SearchIndex {
 		return $sql;
 	}
 	
-	public function getLogs($sort_column='date', $sort_direction='desc', $page=1, $filter_keywords) {
+	public static function getLogs($sort_column='date', $sort_direction='desc', $page=1, $filter_keywords) {
 		$page_size = (int)Symphony::Configuration()->get('pagination_maximum_rows', 'symphony');
 		$start = ($page - 1) * $page_size;
 		$sql = sprintf(
@@ -509,7 +509,7 @@ Class SearchIndex {
 		return Symphony::Database()->fetch($sql);
 	}
 	
-	public function getStatsCount($statistic, $filter_keywords) {
+	public static function getStatsCount($statistic, $filter_keywords) {
 		
 		$filter = ($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '');
 		
@@ -537,4 +537,87 @@ Class SearchIndex {
 			
 		}
 	}
+	
+	public static function parseKeywordString($keywords, $stem_words=FALSE) {
+		
+		if($stem_words) require_once(EXTENSIONS . '/search_index/lib/class.porterstemmer.php');
+		
+		// we will store the various keywords under these categories
+		$boolean_keywords = array(
+			
+			'include-phrase' => array(),// "foo bar" or +"foo bar"
+			'exclude-phrase' => array(), // -"foo bar"
+			
+			'include-word' => array(), // foo or +foo
+			'exclude-word' => array(), // -foo
+			
+			'include-words-all' => array(),
+			'exclude-words-all' => array(),
+			
+			'highlight' => array() // we can highlight these in the returned excerpts
+		);
+		
+		$matches = array();
+		
+		// look for phrases, surrounded by double quotes
+		while (preg_match("/([-]?)\"([^\"]+)\"/", $keywords, $matches)) {
+			if ($matches[1] == '') {
+				$boolean_keywords['include-phrase'][] = $matches[2];
+				$boolean_keywords['highlight'][] = $matches[2];
+			} else {
+				$boolean_keywords['exclude-phrase'][] = $matches[2];
+			}
+			$keywords = str_replace($matches[0], '', $keywords);
+		}
+		
+		$keywords = strtolower(preg_replace("/[ ]+/", " ", $keywords));
+		$keywords = trim($keywords);
+		$keywords = explode(' ', $keywords);
+		
+		if ($keywords == '') {
+			$limit = 0;
+		} else {
+			$limit = count($keywords);
+		}
+		
+		$i = 0;
+		
+		//get all words (both include and exlude)
+		$tmp_include_words = array();
+		while ($i < $limit) {
+			if (substr($keywords[$i], 0, 1) == '+') {
+				$tmp_include_words[] = substr($keywords[$i], 1);
+				$boolean_keywords['highlight'][] = substr($keywords[$i], 1);
+				if ($stem_words) $boolean_keywords['highlight'][] = PorterStemmer::Stem(substr($keywords[$i], 1));
+			} else if (substr($keywords[$i], 0, 1) == '-') {
+				$boolean_keywords['exclude-word'][] = substr($keywords[$i], 1);
+			} else {
+				$tmp_include_words[] = $keywords[$i];
+				$boolean_keywords['highlight'][] = $keywords[$i];
+				if ($stem_words) $boolean_keywords['highlight'][] = PorterStemmer::Stem($keywords[$i]);
+			}
+			$i++;
+		}
+
+		foreach ($tmp_include_words as $word) {
+			if(strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
+				continue;
+			}
+			$boolean_keywords['include-word'][] = $word;
+		}
+		
+		$include_words = array_merge($boolean_keywords['include-phrase'], $boolean_keywords['include-word']);
+		$include_words = array_unique($include_words);
+		$boolean_keywords['include-words-all'] = $include_words;
+		
+		$exclude_words = array_merge($boolean_keywords['exclude-phrase'], $boolean_keywords['exclude-word']);
+		$exclude_words = array_unique($exclude_words);
+		$boolean_keywords['exclude-words-all'] = $exclude_words;
+		
+		$boolean_keywords['highlight'] = array_unique($boolean_keywords['highlight']);
+		
+		return $boolean_keywords;
+		
+	}
+	
 }

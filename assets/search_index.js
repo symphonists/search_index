@@ -2,7 +2,7 @@ var SiteIndex = {
 	
 	sections: [],
 	progress: 0,
-	config: {},
+	refresh_rate: 0,
 	
 	init: function() {
 		
@@ -15,9 +15,7 @@ var SiteIndex = {
 			span.removeClass('to-re-index');
 		});
 		
-		// grab config from DOM
-		var config_dom = jQuery('#search-index-config').text();
-		if (config_dom) eval('this.config = ' + config_dom);
+		this.refresh_rate = Symphony.Context.get('search_index')['re-index-refresh-rate'] * 1000;
 		
 		// go, go, go
 		this.indexNextSection();
@@ -34,7 +32,7 @@ var SiteIndex = {
 		var span = jQuery('#section-' + section_id).addClass('re-index');
 		
 		jQuery.ajax({
-			url: self.config.extension_root_url + '/reindex/?section=' + section_id + '&page=' + page,
+			url: Symphony.Context.get('root') + '/symphony/extension/search_index/reindex/?section=' + section_id + '&page=' + page,
 			success: function(xml) {
 				var total_pages = parseInt(jQuery('pagination', xml).attr('total-pages'));
 				var total_entries = jQuery('pagination', xml).attr('total-entries');
@@ -45,7 +43,7 @@ var SiteIndex = {
 				if (total_pages > 0 && total_pages != page++) {
 					setTimeout(function() {
 						self.indexSectionByPage(section_id, page);
-					}, (self.config['re-index-refresh-rate'] * 1000));
+					}, self.refresh_rate);
 				}
 				// proceed to next section
 				else {					
@@ -53,7 +51,7 @@ var SiteIndex = {
 						span.text(total_entries + ' ' + ((total_entries == 1) ? 'entry' : 'entries')).removeClass('re-index');
 						self.progress++;
 						self.indexNextSection();
-					}, (self.config['re-index-refresh-rate'] * 1000));
+					}, self.refresh_rate);
 				}
 			}
 		});

@@ -114,17 +114,71 @@
 		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=FALSE){
 			$field_id = $this->get('id');
 			
+			$joins .= " LEFT JOIN `tbl_search_index` AS search_index ON (e.id = search_index.entry_id) ";
+			
 			if (!is_array($data)) $data = array($data);
-			
-			foreach ($data as &$value) {
-				$value = SearchIndex::manipulateKeywords($this->cleanValue($value));
-			}
-			
-			$this->_key++;
 			if (is_array($data)) $data = implode(" ", $data);
 			
-			$joins .= " LEFT JOIN `tbl_search_index` AS search_index ON (e.id = search_index.entry_id) ";			
-			$where .= " AND MATCH(search_index.data) AGAINST ('{$data}' IN BOOLEAN MODE) ";
+			$mode = !is_null(Symphony::Configuration()->get('mode', 'search_index')) ? Symphony::Configuration()->get('mode', 'search_index') : 'like';
+			$mode = strtoupper($mode);
+			
+			$do_stemming = (Symphony::Configuration()->get('stem-words', 'search_index') == 'yes') ? TRUE : FALSE;
+			
+			$keywords = SearchIndex::applySynonyms($data);
+			$keywords_boolean = SearchIndex::parseKeywordString($keywords, $do_stemming);
+			
+			switch($mode) {
+				
+				case 'FULLTEXT':				
+					$where .= " AND MATCH(search_index.data) AGAINST ('{$keywords}' IN BOOLEAN MODE) ";
+				break;
+				
+				case 'LIKE':
+				case 'REGEXP':
+				
+					$sql_where = '';
+					
+					// by default, no wildcard separators
+					$prefix = '';
+					$suffix = '';
+					
+					// append wildcard for LIKE
+					if($mode == 'LIKE') {
+						$prefix = $suffix = '%';
+					}
+					// apply word boundary separator
+					if($mode == 'REGEXP') {
+						$prefix = '[[:<:]]';
+						$suffix = '[[:>:]]';
+					}
+					
+					// all words to include in the query (single words and phrases)
+					foreach($keywords_boolean['include-words-all'] as $keyword) {
+						$keyword_stem = Symphony::Database()->cleanValue(PorterStemmer::Stem($keyword));
+						$keyword = Symphony::Database()->cleanValue($keyword);
+						
+						// if the word can be stemmed, look for the word or the stem version
+						if ($do_stemming && ($keyword_stem != $keyword)) {
+							$sql_where .= "(search_index.data $mode '$prefix$keyword$suffix' OR search_index.data $mode '$prefix$keyword$suffix') AND ";
+						} else {
+							$sql_where .= "search_index.data $mode '$prefix$keyword$suffix' AND ";
+						}
+					}
+					
+					// all words or phrases that we do not want
+					foreach($keywords_boolean['exclude-words-all'] as $keyword) {
+						$keyword = Symphony::Database()->cleanValue($keyword);
+						$sql_where .= "search_index.data NOT $mode '$prefix$keyword$suffix' AND ";
+					}
+					
+					// trim unnecessary boolean conditions from SQL
+					$sql_where = preg_replace("/ OR $/", "", $sql_where);
+					$sql_where = preg_replace("/ AND $/", "", $sql_where);
+				
+					$where .= " AND " . $sql_where . " ";
+					
+				break;
+			}
 			
 			return TRUE;
 			

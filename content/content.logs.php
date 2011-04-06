@@ -15,7 +15,6 @@
 			if (isset($_POST['filter']['keyword']) != '') {
 				redirect(Administration::instance()->getCurrentPageURL() . '?keywords=' . $_POST['keywords']);
 			}
-			
 			parent::build($context);
 		}
 						

@@ -23,7 +23,13 @@
 			
 			$this->_section = NULL;
 			$this->_index = NULL;
-			$this->_weightings = array('Highest','High','Medium (none)','Low','Lowest');
+			$this->_weightings = array(
+				__('Highest'),
+				__('High'),
+				__('Medium (none)'),
+				__('Low'),
+				__('Lowest')
+			);
 		}
 		
 		public function build($context) {
@@ -239,8 +245,14 @@
 			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Indexes'));
 			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index, which entries to index, and the weighting of the section in search results.'), array('class' => 'intro')));
 			
+			$this->addElementToHead(new XMLElement(
+				'script',
+				"Symphony.Context.add('search_index', " . json_encode(Symphony::Configuration()->get('search_index')) . ")",
+				array('type' => 'text/javascript')
+			), 99);
+			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
-			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
+			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 101);
 			
 			$tableHead = array();
 			$tableBody = array();
@@ -304,7 +316,7 @@
 					$count_class = null;
 					
 					if (isset($_GET['section']) && in_array($section->get('id'), $re_index) && in_array($section->get('id'), array_keys($this->_indexes))) {
-						SearchIndex::deleteIndexBySection($section_id);
+						SearchIndex::deleteIndexBySection($section->get('id'));
 						$count_data = '<span class="to-re-index" id="section-'.$section->get('id').'">' . __('Waiting to re-index...') . '</span>';
 					}
 					else if (isset($this->_indexes[$section->get('id')])) {
@@ -336,20 +348,6 @@
 			);
 			
 			$this->Form->appendChild($table);
-			
-			$config = new XMLElement(
-				'span',
-				json_encode(
-					array_merge(
-						Symphony::Configuration()->get('search_index'),
-						array(
-							'extension_root_url' => $this->_uri
-						)
-					)
-				),
-				array('id' => 'search-index-config')
-			);
-			$this->Form->appendChild($config);
 			
 			$actions = new XMLElement('div');
 			$actions->setAttribute('class', 'actions');
