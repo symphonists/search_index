@@ -1,6 +1,6 @@
 # Search Index
 
-* Version: 0.7
+* Version: 0.7.1
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
 * Build Date: 2011-04-07
 * Requirements: Symphony 2.2
@@ -182,8 +182,9 @@ Column descriptions:
 
 ## Changelog
 
-### 0.7
+### 0.7.1
 * massive refactoring
+* fixed bug with table prefixes
 * translations added for Romanian and German
 * introduced support for `FULLTEXT`, `LIKE` and `REGEXP` searching
 * introduced "did you mean" soundalikes to suggest alternative spellings
