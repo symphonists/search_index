@@ -353,13 +353,13 @@
 			$actions->setAttribute('class', 'actions');
 			
 			$options = array(
-				array(null, false, 'With Selected...'),
-				array('re-index', false, 'Re-index Entries'),
-				array('delete', false, 'Delete'),
+				array(null, false, __('With Selected...')),
+				array('re-index', false, __('Re-index Entries')),
+				array('delete', false, __('Delete')),
 			);
 			
 			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', 'Apply', 'submit'));
+			$actions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
 			
 			$this->Form->appendChild($actions);
 

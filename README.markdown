@@ -1,12 +1,12 @@
 # Search Index
 
-* Version: 0.6.5
+* Version: 0.7
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-02-17
+* Build Date: 2011-04-07
 * Requirements: Symphony 2.2
 
 ## Description
-Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index Field that allows keyword filtering in data sources, or the included Search Index data source for searching multiple sections at once.
+Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index field that allows keyword filtering in data sources, or the included Search Index data source for searching multiple sections at once.
 
 ## Usage
 1. Add the `search_index` folder to your Extensions directory
@@ -80,11 +80,6 @@ This in itself is not enough to render a results page. To do so, use the `$ds-se
 ## Weighting
 We all know that all sections are equal, only some are more equal than others ;-) You can give higher or lower weighting to results from certain sections, by issuing them a weighting when you configure their Search Index. The default is `Medium` (no weighting), but if you want more chance of entries from your section appearing higher up the search results, choose `High`; or for even more prominence `Highest`. The opposite is true: to bury entries lower down the results then choose `Low` or `Lowest`. This weighting has the effect of doubling/quadrupling or halving/quartering the original "relevance" score calculated by the search.
 
-## Boolean search
-Search Index makes use of MySQL's boolean fulltext search. When using the multi-section search, you can use the `+` and `-` directives to make results more specific. In fact, Search Index actually appends `+` to all words, making them required, to make the results as specific is possible. You can also use double-quotes too, to search for specific strings.
-
-For more information see <http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolean.html>
-
 ## Configuration
 The common configuration options are discussed above. This is a full list of the variables you *should* see in your `config.php`. If some are missing it is because you have previously installed an earlier version of the extension. You can add these variables manually to make use of them.
 
@@ -94,38 +89,69 @@ Defaults to `20`. When manually re-indexing sections in the backend (Search Inde
 ### `re-index-refresh-rate`
 Defaults to `0.5` seconds. This is the "pause" between each cycle of indexing when manually re-indexing sections. If you have a high traffic site (or slow server) and you are worried that many consecutive page refreshes will use too much server power, then choose a higher number and there will be a longer pause between each page of indexing. The larger the number, the longer you have to wait during re-indexing. Set to `0` for super-quick times.
 
-### `append-wildcard`
-Defaults to `no`. When enabled this option will append the `*` wildcard character to the end of each word in your search phrase thereby allowing partial word matches. For example:
+### `min-word-length`
+The smallest length of word to index. Words shorter than this will be ignored. If your site is technical and you need to index abbreviations such as `CSS` then make sure `min-word-length` is set to `3` to allow for these!
 
-    before: foo bar
-	after: foo* bar*
+### `max-word-length`
+The longest length of word to index. Words longer than this will be ignored. The maximum value this variable can be is limited by the database column size (currently `varchar(255)`).
 
-If you have entries containing the text "food" or "barn" the first search would not find these. The second would.
+### `stem-words`
+Allow word stems to be included in searches. This usually results in more matches. The popular Porter Stemmer algorithm is used. Examples:
 
-This is disabled by default because it will decrease the relevance of your results and may not perform well on massive datasets. If you need this functionality you should investigate "word stemming" instead.
+* summary, summarise => summar
+* filters, filtering => filter
 
-### `append-all-words-required`
-Defaults to `yes`. When enabled this option will append the `+` "required" character to the start of each word in your search phrase. This has the effect of making all words required. For example:
+Note: I found a few oddities, namely words ending in `y` which are shortened to end in `i`. For example `symphony` and `entry` become `symphoni` and `entri` respectively. This is obviously incorrect, therefore the Porter algorithm is recommended for English-language sites only.
 
-    before: foo bar
-	after: +foo +bar
+### `mode`
+Three query modes are supported:
 
-If you have one entry containing "foo" and another containing "bar" (but neither contain both words), then the first search will find both entries, and the second search will find none. 
+* `like` uses `LIKE '%...%'` syntax to match whole and partial words
+* `regexp` uses `REGEXP [[:<:]]...[[:>:]]` syntax to match whole words only
+* `fulltext` uses `MATCH(...) AGAINST(...)` syntax for MySQL's own fulltext binary search
 
-While this may decrease the number of results, the results will be more specific and hopefully relevant.
+Changing this variable changes the query mode for all searches made by this extension, both the Search Index data source and filtering on the Search Index field. Mode switching was introduced because of the limitations of fulltext binary search: while very fast, there is a word length limitation, and doesn't work well with short indexed strings or small data sets.
 
-### TODO: document these!
+`like` is the default as this seems to provide the best compromise between performance, in-word matching, and narrowness of results returned.
 
-* `default-sections` => NULL,
-* `excerpt-length` => `250`,
-* `get-param-prefix` => NULL,
-* `get-param-keywords` => `keywords`,
-* `get-param-per-page` => `per-page`,
-* `get-param-sort` => `sort`,
-* `get-param-direction` => `direction`,
-* `get-param-sections` => `sections`,
-* `get-param-page` => `page`,
-* `indexes` => `a:1:{i:1;a:3:{s:6:\"fields\";a:2:{i:0;s:5:\"test2\";i:1;s:9:\"html-test\";}s:9:\"weighting\";s:1:\"2\";s:7:\"filters\";a:0:{}}}`,
+Both `like` and `regexp` modes correctly handle boolean operators in search results:
+
+* prefix a keyword with `+` to make it required
+* prefix a keyword with `-` to make it forbidden
+* surround a phrase with `"..."` to match the whole phrase
+
+### `excerpt-length`
+When using the Search Index data source, each matched entry will include an excerpt with search keywords highlighted in the text. The default length of this string is `250` characters, but modify it to suit your design.
+
+### `build-entries`
+By default the Search Index data source will only return an `<entry />` stub for each entry found. It is the developer's job to add additional data sources that filter using the search output parameter, in order to provide extra fields to build search results fully.
+
+However, for the lazy amongst you, set this variable to `yes` and the entries will be built in their entirety in the data source. This has the benefit that you need only a single data source, but if your entries have many fields, then this will likely have a performance hit as you are adding fields to your XML that you don't need. With great power comes great responsibility, my son.
+
+### `default-sections`
+A comma-separated string of section handles. If you would rather not pass these via a GET parameter to the search data source (e.g. `/search/?sections=articles,comments`) then add these to the config and omit them from the URL.
+
+### `log-keywords`
+When enabled, each unique search will be logged and be visible under Search Index > Logs.
+
+### `get-param-*`
+These variables store the _name_ of the GET parameter that the Search Index data source looks for. Change these if you don't like my choice of GET parameter names, or if you want them in your own language. For example:
+
+	get-param-keywords' => 'term',
+	get-param-per-page' => 'limit',
+	get-param-sort' => 'order-by',
+	get-param-direction' => 'order-direction',
+	get-param-sections' => 'in',
+	get-param-page' => 'p',
+
+This would mean you'd create your search URL as:
+
+	/?term=foo+bar&limit=20&order-by=id&order-direction=asc&in=articles,comments&p=2
+
+The `get-param-prefix` variable is explained above in "Using Symphony URL Parameters".
+
+### `indexes` and `synonyms`
+These serialised arrays are created by saving settings from Search Index > Indexes and Search Index > Synonyms. Please don't edit them here, or bad things will happen to you.
 
 ## Synonyms
 
@@ -152,8 +178,17 @@ Column descriptions:
 
 ## Known issues
 * you can not order results by relevance score when using a single data source. This is only available when using the custom Search Index data source
+* if you hit the word-length limitations using boolean fulltext searching, try an alternative `mode` (`like` or `regexp`).
 
 ## Changelog
+
+### 0.7
+* massive refactoring
+* translations added for Romanian and German
+* introduced support for `FULLTEXT`, `LIKE` and `REGEXP` searching
+* introduced "did you mean" soundalikes to suggest alternative spellings
+* introduced word stemming
+* the search data source can now build the full entry XML for you
 
 ### 0.6.2, 0.6.3
 * added sortable/searchable Logs page to allow viewing of searches

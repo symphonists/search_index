@@ -1,3 +1,9 @@
+Symphony.Language.add({
+	'Indexing page {$page} of {$total}': false,
+	'{$total} entries': false,
+	'{$total} entry': false
+});
+
 var SiteIndex = {
 	
 	sections: [],
@@ -37,7 +43,9 @@ var SiteIndex = {
 				var total_pages = parseInt(jQuery('pagination', xml).attr('total-pages'));
 				var total_entries = jQuery('pagination', xml).attr('total-entries');
 				
-				span.show().text('Indexing page ' + page + ' of ' + total_pages);
+				span.show().text(
+					Symphony.Language.get('Indexing page {$page} of {$total}', { page: page, total: total_pages})
+				);
 				
 				// there are more pages left
 				if (total_pages > 0 && total_pages != page++) {
@@ -48,7 +56,16 @@ var SiteIndex = {
 				// proceed to next section
 				else {					
 					setTimeout(function() {
-						span.text(total_entries + ' ' + ((total_entries == 1) ? 'entry' : 'entries')).removeClass('re-index');
+						if(total_entries == 1) {
+							span.text(
+								Symphony.Language.get('{$total} entry', { total: total_entries})
+							);
+						} else {
+							span.text(
+								Symphony.Language.get('{$total} entries', { total: total_entries})
+							);
+						}
+						span.removeClass('re-index');
 						self.progress++;
 						self.indexNextSection();
 					}, self.refresh_rate);

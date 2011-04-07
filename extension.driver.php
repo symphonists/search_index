@@ -96,16 +96,6 @@
 			
 			$this->createTables();
 			
-			/*
-			
-			'min-word-length' => '3',
-			'max-word-length' => '30',
-			'stem-words' => 'yes',
-			'mode' => 'like',
-			'build-entries' => 'no',
-			'log-keywords' => 'yes',
-				*/
-			
 			// number of entries per page when rebuilding index
 			Symphony::Configuration()->set('re-index-per-page', 20, 'search_index');
 			// refresh frequency when rebuilding index
@@ -140,9 +130,7 @@
 			
 			Administration::instance()->saveConfig();
 			
-			
-			
-			return true;
+			return TRUE;
 		}
 		
 		public function update($previousVersion){

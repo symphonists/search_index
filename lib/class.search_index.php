@@ -8,8 +8,6 @@ Class SearchIndex {
 	private static $_where = NULL;
 	private static $_joins = NULL;
 	
-	private static $_keyword_cache = array();
-	
 	/**
 	* Set up static members
 	*/
@@ -190,7 +188,8 @@ Class SearchIndex {
 		$words = array_unique($words);
 		
 		// store words to log this time around
-		$log_keywords = array();
+		$all_keywords = array();
+		$add_keywords = array();
 		
 		foreach($words as $word) {
 			$word = trim($word);
@@ -200,35 +199,36 @@ Class SearchIndex {
 				continue;
 			}
 			
-			// have we already parsed this word in this process?
-			if(isset(self::$_keyword_cache[$word])) {
-				$log_keywords[$word] = self::$_keyword_cache[$word];
-				continue;
-			}
+			$all_keywords[$word] = Symphony::Database()->cleanValue($word);
+			$add_keywords[$word] = Symphony::Database()->cleanValue($word);
 			
-			// does this keyword exist in the database already? get its ID
-			$keyword_id = Symphony::Database()->fetchVar('id', 0, sprintf("SELECT id FROM `tbl_search_index_keywords` WHERE `keyword` = '%s'", Symphony::Database()->cleanValue($word)));
-			if(is_null($keyword_id)) {
-				// if it doesn't exist, we need to insert and get its ID
-				Symphony::Database()->insert(array('keyword' => $word), 'tbl_search_index_keywords');
-				$keyword_id = Symphony::Database()->getInsertID();
-			}
-			
-			// cache the word
-			self::$_keyword_cache[$word] = $keyword_id;
-			$log_keywords[$word] = $keyword_id;
+		}
+		
+		// which keywords have already been logged before?
+		$existing_keywords = Symphony::Database()->fetch(sprintf(
+			"SELECT id, keyword FROM `tbl_search_index_keywords` WHERE `keyword` IN ('%s')",
+			implode("','", array_values($all_keywords))
+		));
+		// remove existing words from the set we need to add
+		foreach($existing_keywords as $word) unset($add_keywords[$word['keyword']]);
+		
+		// add new keywords, retrieving their ID
+		foreach($add_keywords as $word => $clean) {
+			Symphony::Database()->insert(array('keyword' => $word), 'tbl_search_index_keywords');
+			$keyword_id = Symphony::Database()->getInsertID();
+			$existing_keywords[] = array('id' => $keyword_id, 'keyword' => $word);
 		}
 		
 		// no words to log
-		if(count($log_keywords) == 0) return;
+		if(count($existing_keywords) == 0) return;
 		
 		// delete keyword associations for this entry
 		Symphony::Database()->query(sprintf("DELETE FROM `tbl_search_index_entry_keywords` WHERE `entry_id` = %d", $entry_id));
 		
 		// add all the new word associations in one batch (MUCH faster than an INSERT per word!)
 		$insert = "INSERT INTO tbl_search_index_entry_keywords (entry_id, keyword_id, frequency) VALUES ";
-		foreach($log_keywords as $keyword => $keyword_id) {
-			$insert .= sprintf("(%d, %d, '%s'),", $entry_id, $keyword_id, substr_count($data, $keyword));
+		foreach($existing_keywords as $word) {
+			$insert .= sprintf("(%d, %d, '%s'),", $entry_id, $word['id'], substr_count($data, $word['keyword']));
 		}
 		$insert = trim($insert, ',');
 		Symphony::Database()->query($insert);
@@ -493,9 +493,13 @@ Class SearchIndex {
 		return $sql;
 	}
 	
-	public static function getLogs($sort_column='date', $sort_direction='desc', $page=1, $filter_keywords) {
+	public static function getLogs($sort_column='date', $sort_direction='desc', $page=NULL, $filter_keywords) {
 		$page_size = (int)Symphony::Configuration()->get('pagination_maximum_rows', 'symphony');
 		$start = ($page - 1) * $page_size;
+		if(is_null($page)) {
+			$page_size = 999999999;
+			$start = 0;
+		}
 		$sql = sprintf(
 			"%s
 			ORDER BY %s %s

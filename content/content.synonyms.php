@@ -85,7 +85,7 @@
 				$this->_synonym['word']
 			));
 			$fieldset->appendChild($label);
-			$fieldset->appendChild(new XMLElement('p', 'e.g. United Kingdom', array('class'=>'help')));
+			$fieldset->appendChild(new XMLElement('p', __('e.g. United Kingdom'), array('class'=>'help')));
 			
 			$this->Form->appendChild($fieldset);
 			
@@ -103,7 +103,7 @@
 				$this->_synonym['synonyms']
 			));
 			$fieldset->appendChild($label);
-			$fieldset->appendChild(new XMLElement('p', 'e.g. UK, Great Britain, GB', array('class'=>'help')));
+			$fieldset->appendChild(new XMLElement('p', __('e.g. UK, Great Britain, GB'), array('class'=>'help')));
 			
 			$this->Form->appendChild(new XMLElement('input', NULL, array('type'=>'hidden','name'=>'synonym[hash]','value'=>$this->_hash)));
 			
@@ -131,7 +131,7 @@
 				__('Search Index') . " &rsaquo; " . __('Synonyms') . 
 				Widget::Anchor(__('Create New'), Administration::instance()->getCurrentPageURL().'edit/', __('Create New'), 'create button')->generate()
 			);
-			$this->Form->appendChild(new XMLElement('p', __('Configure synonym expansion, so that common misspellings or variations of phrase can be normalised to a single phrase.'), array('class' => 'intro')));
+			$this->Form->appendChild(new XMLElement('p', __('Configure synonym expansion, so that common misspellings or variations of phrases can be normalised to a single phrase.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
@@ -175,12 +175,12 @@
 			$actions->setAttribute('class', 'actions');
 			
 			$options = array(
-				array(NULL, FALSE, 'With Selected...'),
-				array('delete', FALSE, 'Delete'),
+				array(NULL, FALSE, __('With Selected...')),
+				array('delete', FALSE, __('Delete')),
 			);
 			
 			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', 'Apply', 'submit'));
+			$actions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
 			
 			$this->Form->appendChild($actions);
 

@@ -9,7 +9,7 @@
 		*/
 		function __construct(&$parent){
 			parent::__construct($parent);
-			$this->_name = 'Search Index Filter';
+			$this->_name = __('Search Index');
 			$this->_required = FALSE;			
 			$this->set('hide', 'no');
 		}
@@ -67,7 +67,7 @@
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 			$value = $data['value'];					
 			$label = Widget::Label($this->get('label'));
-			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', 'Optional'));			
+			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));			
 		}
 		
 		/**
@@ -82,7 +82,7 @@
 		*/
 		public function displayDatasourceFilterPanel(&$wrapper, $data=NULL, $errors=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 			$wrapper->appendChild(new XMLElement('h4', $this->get('label') . ' <i>'.$this->Name().'</i>'));
-			$label = Widget::Label('Value');
+			$label = Widget::Label(__('Value'));
 			$label->appendChild(Widget::Input('fields[filter]'.($fieldnamePrefix ? '['.$fieldnamePrefix.']' : '').'['.$this->get('id').']'.($fieldnamePostfix ? '['.$fieldnamePostfix.']' : ''), ($data ? General::sanitize($data) : NULL)));	
 			$wrapper->appendChild($label);
 		}

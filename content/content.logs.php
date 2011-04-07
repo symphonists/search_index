@@ -28,19 +28,58 @@
 			$sort_column = 'date';
 			$sort_order = 'desc';
 			$filter_keywords = '';
+			$filter_view = '';
 			
 			if (isset($_GET['sort'])) $sort_column = $_GET['sort'];
 			if (isset($_GET['order'])) $sort_order = $_GET['order'];
 			if (isset($_GET['keywords'])) $filter_keywords = $_GET['keywords'];
+			if (isset($_GET['view'])) $filter_view = $_GET['view'];
 			
-			$logs = SearchIndex::getLogs($sort_column, $sort_order, $page, $filter_keywords);
-						
+			$logs = SearchIndex::getLogs($sort_column, $sort_order, ($filter_view == 'export') ? NULL : $page, $filter_keywords);
+			
+			if($filter_view == 'export') {
+				
+				$file_name = sprintf('%s/search-index.log.%d.csv', TMP, time());
+				$csv = fopen($file_name, 'w');
+				
+				fputcsv($csv, array(__('Date'), __('Keywords'), __('Adjusted Keywords'), __('Results'), __('Depth'), __('Session ID')), ',', '"');
+				
+				foreach($logs as $log) {
+					fputcsv($csv, array(
+						$log['date'],
+						$log['keywords'],
+						$log['keywords_manipulated'],
+						$log['results'],
+						$log['depth'],
+						$log['session_id']
+					), ',', '"');
+				}
+				
+				fclose($csv);
+				
+				header('Content-type: application/csv');
+				header('Content-Disposition: attachment; filename="' . $file_name . '"');
+				readfile($file_name);
+				unlink($file_name);
+				
+				exit;
+				
+			}
+			
 			$start = max(1, (($page - 1) * $page_size));
 			$end = ($start == 1 ? $page_size : $start + count($logs));
 			$total = SearchIndex::countLogs($filter_keywords);
 			$pages = ceil($total / $page_size);
 			
-			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Logs'));
+			$this->appendSubheading(
+				__('Search Index') . " &rsaquo; " . __('Logs') . 
+				Widget::Anchor(
+					__('Export CSV'),
+					Administration::instance()->getCurrentPageURL(). '?view=export&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords,
+					NULL,
+					'button'
+				)->generate()
+			);
 			
 			$stats = array(
 				'unique-users' => SearchIndex::getStatsCount('unique-users', $filter_keywords),
@@ -53,11 +92,11 @@
 			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
 			$filters = new XMLElement('div', NULL, array('class' => 'search-index-log-filters'));
-			$label = new XMLElement('label', __('Filter searches containing the keywords ') . Widget::Input('keywords', $filter_keywords)->generate());
+			$label = new XMLElement('label', __('Filter searches containing the keywords %s', array(Widget::Input('keywords', $filter_keywords)->generate())));
 			$filters->appendChild($label);
-			$filters->appendChild(new XMLElement('input', NULL, array('type'=>'submit','value'=>__('Filter'),'name'=>'filter[keyword]')));
+			$filters->appendChild(new XMLElement('input', NULL, array('type' => 'submit', 'value' => __('Filter'), 'name' => 'filter[keyword]')));
 			
-			$filters->appendChild(new XMLElement('p', sprintf(__('<strong>%d</strong> unique searches from <strong>%d</strong> unique users via <strong>%d</strong> distinct search terms. Each search yielded an average of <strong>%d</strong> results.'), $stats['unique-searches'], $stats['unique-users'], $stats['unique-terms'], $stats['average-results']), array('class' => 'intro')));
+			$filters->appendChild(new XMLElement('p', sprintf(__('<strong>%s</strong> unique searches from <strong>%s</strong> unique users via <strong>%s</strong> distinct search terms. Each search yielded an average of <strong>%s</strong> results.', array($stats['unique-searches'], $stats['unique-users'], $stats['unique-terms'], $stats['average-results']))), array('class' => 'intro')));
 			
 			$this->Form->appendChild($filters);
 			
@@ -133,7 +172,7 @@
 				if ($page > 1) {
 					$li->appendChild(Widget::Anchor(__('First'), Administration::instance()->getCurrentPageURL() . '?pg=1&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
-					$li->setValue('First');
+					$li->setValue(__('First'));
 				}
 				$ul->appendChild($li);
 				
@@ -142,7 +181,7 @@
 				if ($page > 1) {
 					$li->appendChild(Widget::Anchor(__('&larr; Previous'), Administration::instance()->getCurrentPageURL(). '?pg='.($page-1).'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
-					$li->setValue('&larr; Previous');
+					$li->setValue('&larr; ' . __('Previous'));
 				}				
 				$ul->appendChild($li);
 
@@ -160,7 +199,7 @@
 				if ($page < $pages) {
 					$li->appendChild(Widget::Anchor(__('Next &rarr;'), Administration::instance()->getCurrentPageURL(). '?pg='.($page+1).'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
-					$li->setValue('Next &rarr;');
+					$li->setValue(__('Next') . ' &rarr;');
 				}				
 				$ul->appendChild($li);
 
@@ -169,7 +208,7 @@
 				if ($page < $pages) {
 					$li->appendChild(Widget::Anchor(__('Last'), Administration::instance()->getCurrentPageURL(). '?pg='.$pages.'&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords));
 				} else {
-					$li->setValue('Last');
+					$li->setValue(__('Last'));
 				}				
 				$ul->appendChild($li);
 				
