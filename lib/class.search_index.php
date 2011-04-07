@@ -199,6 +199,25 @@ Class SearchIndex {
 				continue;
 			}
 			
+			// exclude words that are obviously code
+			if(
+				// probably HTML
+				preg_match("/^lt;/", $word) || 
+				preg_match("/&gt$/", $word) ||
+				preg_match("/&lt;/", $word) ||
+				preg_match("/&gt;/", $word) || 
+				preg_match("/=/", $word) || 
+				// start with $, probably an XSLT param
+				preg_match("/^\\$/", $word) || 
+				// start with a /, probably XPath
+				preg_match("/^\//", $word) || 
+				// probably PHP
+				preg_match("/->/", $word) || 
+				preg_match("/::/", $word)
+			) {
+				continue;
+			}
+			
 			$all_keywords[$word] = Symphony::Database()->cleanValue($word);
 			$add_keywords[$word] = Symphony::Database()->cleanValue($word);
 			

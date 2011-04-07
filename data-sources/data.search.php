@@ -14,6 +14,10 @@
 			parent::__construct($parent, $env, $process_params);
 		}
 		
+		public static function sortWordDistance($a, $b) {
+			return $a['distance'] > $b['distance'];
+		}
+		
 		public function about(){
 			return array(
 					'name' => 'Search Index',
@@ -296,13 +300,18 @@
 						"SELECT keyword FROM tbl_search_index_keywords WHERE SOUNDEX(keyword) = SOUNDEX('%s')",
 						Symphony::Database()->cleanValue($word)
 					));
-					// each word may have multiple soundalikes, so choose the first
-					// one we find that is one step away from the input word
-					foreach($soundalikes as $soundalike) {
-						if (levenshtein($soundalike, $word) == 1) {
-							$sounds_like[$word] = $soundalike;
+					foreach($soundalikes as $i => &$soundalike) {
+						if($soundalike == $word) {
+							unset($soundalikes[$i]);
+							continue;
 						}
+						$soundalike = array(
+							'word' => $soundalike,
+							'distance' => levenshtein($soundalike, $word)
+						);
 					}
+					usort($soundalikes, array('datasourcesearch', 'sortWordDistance'));
+					$sounds_like[$word] = $soundalikes[0]['word'];
 				}
 				
 				// add words to XML
@@ -312,7 +321,8 @@
 						$alternative_spelling->appendChild(
 							new XMLElement('keyword', NULL, array(
 								'original' => $word,
-								'alternative' => $soundalike
+								'alternative' => $soundalike,
+								'distance' => levenshtein($soundalike, $word)
 							))
 						);
 					}
