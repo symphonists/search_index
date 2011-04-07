@@ -256,8 +256,8 @@
 								%4\$s
 							) AS score
 						FROM
-							sym_search_index as `index`
-							JOIN sym_entries as `e` ON (index.entry_id = e.id)
+							tbl_search_index as `index`
+							JOIN tbl_entries as `e` ON (index.entry_id = e.id)
 						WHERE
 							%5\$s
 							AND e.section_id IN ('%6\$s')
@@ -293,7 +293,7 @@
 				
 				foreach($keywords_boolean['include-words-all'] as $word) {
 					$soundalikes = Symphony::Database()->fetchCol('keyword', sprintf(
-						"SELECT keyword FROM sym_search_index_keywords WHERE SOUNDEX(keyword) = SOUNDEX('%s')",
+						"SELECT keyword FROM tbl_search_index_keywords WHERE SOUNDEX(keyword) = SOUNDEX('%s')",
 						Symphony::Database()->cleanValue($word)
 					));
 					// each word may have multiple soundalikes, so choose the first

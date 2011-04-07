@@ -487,7 +487,7 @@ Class SearchIndex {
 	
 	private static function getLogsSQL($filter_keywords) {
 		$sql = sprintf(
-			"SELECT id, keywords, keywords_manipulated, date, sections, results, MAX(page) as `depth`, session_id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id",
+			"SELECT id, keywords, keywords_manipulated, date, sections, results, MAX(page) as `depth`, session_id FROM `tbl_search_index_logs` %s GROUP BY keywords, session_id",
 			($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '')
 		);
 		return $sql;
@@ -520,22 +520,22 @@ Class SearchIndex {
 		switch($statistic) {
 			case 'unique-users':
 				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
-					"SELECT COUNT(DISTINCT(session_id)) as `total` FROM `sym_search_index_logs` %s", $filter
+					"SELECT COUNT(DISTINCT(session_id)) as `total` FROM `tbl_search_index_logs` %s", $filter
 				));
 			break;
 			case 'unique-searches':
 				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
-					"SELECT COUNT(*) as `total` FROM (SELECT id FROM `sym_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
+					"SELECT COUNT(*) as `total` FROM (SELECT id FROM `tbl_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
 				));
 			break;
 			case 'unique-terms':
 				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
-					"SELECT COUNT(DISTINCT(keywords)) as `total` FROM `sym_search_index_logs` %s", $filter
+					"SELECT COUNT(DISTINCT(keywords)) as `total` FROM `tbl_search_index_logs` %s", $filter
 				));
 			break;
 			case 'average-results':
 				return (int)Symphony::Database()->fetchVar('total', 0, sprintf(
-					"SELECT AVG(`temp`.`average`) as `total` FROM (SELECT results as `average` FROM `sym_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
+					"SELECT AVG(`temp`.`average`) as `total` FROM (SELECT results as `average` FROM `tbl_search_index_logs` %s GROUP BY keywords, session_id) as `temp`", $filter
 				));
 			break;
 			

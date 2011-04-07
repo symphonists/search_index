@@ -61,7 +61,7 @@
 				);
 				
 				Symphony::Database()->query(
-					"CREATE TABLE IF NOT EXISTS `sym_search_index_keywords` (
+					"CREATE TABLE IF NOT EXISTS `tbl_search_index_keywords` (
 					  `id` int(11) NOT NULL auto_increment,
 					  `keyword` varchar(255) default NULL,
 					  PRIMARY KEY  (`id`),
@@ -70,7 +70,7 @@
 				);
 				
 				Symphony::Database()->query(
-					"CREATE TABLE IF NOT EXISTS `sym_search_index_entry_keywords` (
+					"CREATE TABLE IF NOT EXISTS `tbl_search_index_entry_keywords` (
 					  `entry_id` int(11) default NULL,
 					  `keyword_id` int(11) default NULL,
 					  `frequency` int(11) default NULL,
@@ -168,8 +168,8 @@
 				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_fields_search_index`");
 				Symphony::Database()->query("DROP TABLE `tbl_search_index_logs`");
-				Symphony::Database()->query("DROP TABLE `sym_search_index_keywords`");
-				Symphony::Database()->query("DROP TABLE `sym_search_index_entry_keywords`");
+				Symphony::Database()->query("DROP TABLE `tbl_search_index_keywords`");
+				Symphony::Database()->query("DROP TABLE `tbl_search_index_entry_keywords`");
 			}
 			catch(Exception $e){
 				return false;
