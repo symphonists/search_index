@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.7.1',
-				'release-date'	=> '2011-04-07',
+				'version'		=> '0.7.3',
+				'release-date'	=> '2011-04-08',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
@@ -88,36 +88,11 @@
 			return TRUE;
 			
 		}
-
-		/**
-		* Set up configuration defaults and database tables
-		*/		
-		public function install(){
+		
+		private function setInitialConfig() {
 			
-			$this->createTables();
-			
-			// number of entries per page when rebuilding index
 			Symphony::Configuration()->set('re-index-per-page', 20, 'search_index');
-			// refresh frequency when rebuilding index
 			Symphony::Configuration()->set('re-index-refresh-rate', 0.5, 'search_index');
-			
-			// default sections if none specifed in URL
-			Symphony::Configuration()->set('default-sections', '', 'search_index');
-			
-			// length of highlighted excerpt in results
-			Symphony::Configuration()->set('excerpt-length', 250, 'search_index');
-			// minimum word length to index (must be more than 1)
-			Symphony::Configuration()->set('min-word-length', 3, 'search_index');
-			// maximum word length to index (much be less than 255)
-			Symphony::Configuration()->set('max-word-length', 30, 'search_index');
-			// also search for word stems (increases number of results found)
-			Symphony::Configuration()->set('stem-words', 'yes', 'search_index');
-			// automatically build entry XML in the search data source (slower)
-			Symphony::Configuration()->set('build-entries', 'no', 'search_index');
-			// query type ('like' or 'fulltext')
-			Symphony::Configuration()->set('mode', 'like', 'search_index');
-			// log searches for analysis
-			Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
 			
 			// names of GET parameters used for custom search DS
 			Symphony::Configuration()->set('get-param-prefix', '', 'search_index');
@@ -128,7 +103,31 @@
 			Symphony::Configuration()->set('get-param-sections', 'sections', 'search_index');
 			Symphony::Configuration()->set('get-param-page', 'page', 'search_index');
 			
+			// default search params, used if not specifed in GET
+			Symphony::Configuration()->set('default-sections', '', 'search_index');
+			Symphony::Configuration()->set('default-per-page', 20, 'search_index');
+			Symphony::Configuration()->set('default-sort', 'score', 'search_index');
+			Symphony::Configuration()->set('default-direction', 'desc', 'search_index');
+			
+			Symphony::Configuration()->set('excerpt-length', 250, 'search_index');
+			Symphony::Configuration()->set('min-word-length', 3, 'search_index');
+			Symphony::Configuration()->set('max-word-length', 30, 'search_index');
+			Symphony::Configuration()->set('stem-words', 'yes', 'search_index');
+			Symphony::Configuration()->set('build-entries', 'no', 'search_index');
+			Symphony::Configuration()->set('mode', 'like', 'search_index');
+			Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
+						
 			Administration::instance()->saveConfig();
+			
+		}
+
+		/**
+		* Set up configuration defaults and database tables
+		*/		
+		public function install(){
+			
+			$this->createTables();
+			$this->setInitialConfig();
 			
 			return TRUE;
 		}
@@ -139,18 +138,10 @@
 				Symphony::Database()->query("ALTER TABLE `tbl_search_index_logs` ADD `keywords_manipulated` varchar(255) default NULL");
 			}
 			
-			if(version_compare($previousVersion, '0.6.5', '<')){
-				
-				$this->createTables();
-				
-				Symphony::Configuration()->set('min-word-length', 3, 'search_index');
-				Symphony::Configuration()->set('max-word-length', 30, 'search_index');
-				Symphony::Configuration()->set('stem-words', 'yes', 'search_index');
-				Symphony::Configuration()->set('build-entries', 'no', 'search_index');
-				Symphony::Configuration()->set('mode', 'like', 'search_index');
-				Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
-				Administration::instance()->saveConfig();
-				
+			// lower versions get the full upgrade treatment, new tables and config
+			// should retain "indexes" and "synonyms" in config though.
+			if(version_compare($previousVersion, '0.7.1', '<')){
+				$this->install();
 			}
 			
 			return TRUE;

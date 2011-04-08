@@ -7,7 +7,7 @@
 	Class datasourcesearch extends Datasource{
 		
 		public $dsParamROOTELEMENT = 'search';
-		public $dsParamLIMIT = '20';
+		public $dsParamLIMIT = '1';
 		public $dsParamSTARTPAGE = '1';
 		
 		public function __construct(&$parent, $env=NULL, $process_params=true){
@@ -62,12 +62,12 @@
 			
 			// get input parameters from GET request
 			$param_keywords = isset($_GET[$config->{'get-param-keywords'}]) ? trim($_GET[$config->{'get-param-keywords'}]) : '';
-			$param_sort = isset($_GET[$config->{'get-param-sort'}]) ? $_GET[$config->{'get-param-sort'}] : 'score';
-			$param_direction = isset($_GET[$config->{'get-param-direction'}]) ? strtolower($_GET[$config->{'get-param-direction'}]) : 'desc';
+			$param_sort = isset($_GET[$config->{'get-param-sort'}]) ? $_GET[$config->{'get-param-sort'}] : $config->{'default-sort'};
+			$param_direction = isset($_GET[$config->{'get-param-direction'}]) ? strtolower($_GET[$config->{'get-param-direction'}]) : $config->{'default-direction'};
 			
 			// set pagination on the data source
 			$this->dsParamSTARTPAGE = isset($_GET[$config->{'get-param-page'}]) ? (int)$_GET[$config->{'get-param-page'}] : $this->dsParamSTARTPAGE;
-			$this->dsParamLIMIT = (isset($_GET[$config->{'get-param-per-page'}]) && (int)$_GET[$config->{'get-param-per-page'}] > 0) ? (int)$_GET[$config->{'get-param-per-page'}] : $this->dsParamLIMIT;
+			$this->dsParamLIMIT = (isset($_GET[$config->{'get-param-per-page'}]) && (int)$_GET[$config->{'get-param-per-page'}] > 0) ? (int)$_GET[$config->{'get-param-per-page'}] : $config->{'default-per-page'};
 			
 			// build ORDER BY statement for later
 			switch($param_sort) {
