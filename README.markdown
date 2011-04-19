@@ -1,8 +1,8 @@
 # Search Index
 
-* Version: 0.7.3
+* Version: 0.7.4
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-04-08
+* Build Date: 2011-04-19
 * Requirements: Symphony 2.2
 
 ## Description
@@ -180,18 +180,18 @@ These serialised arrays are created by saving settings from Search Index > Index
 
 ## Synonyms
 
-Version 0.6 introduced the concept of synonyms, available by choosing Search Index > Synonyms. This allows you to configure word replacements so that commonly mis-spelt terms are automatically fixed, or terms with many alternative spellings or variations can be normalised to a single spelling. An example:
+This allows you to configure word replacements so that commonly mis-spelt terms are automatically fixed, or terms with many alternative spellings or variations can be normalised to a single spelling. An example:
 
 * Replacement word `United Kingdom`
 * Synonyms: `uk, great britain, GB, united kingdoms`
 
 When a user searches for any of the synonym words, they will be replaced by the replacement word. So if a user searches for `countries in the UK` their search will actually use the phrase `counties in the United Kingdom`. 
 
-Synonym matches are case-insensitive.
+Synonym matches are _not_ case-sensitive.
 
 ## Log viewer
 
-You can see what your users have searched for on the Search Index > Logs page. This lists every unique search. A "unique search" is a combination of session and keyword, so if a user searches for the same keyword three times during one session, all three will be logged, but only displayed once in the Logs table.
+You can see what your users have searched for on the Search Index > Logs page. When logging is enabled, every search made through the Search Index data source will be stored. However the log viewer only displays _unique_ searches — if in one session a user searches using the same keywords four times, it will only display in the log viewer once.
 
 Column descriptions:
 
@@ -204,14 +204,3 @@ Column descriptions:
 ## Known issues
 * you can not order results by relevance score when using a single data source. This is only available when using the custom Search Index data source
 * if you hit the word-length limitations using boolean fulltext searching, try an alternative `mode` (`like` or `regexp`).
-
-## Changelog
-
-### 0.7.1
-* massive refactoring
-* fixed bug with table prefixes
-* translations added for Romanian and German
-* introduced support for `FULLTEXT`, `LIKE` and `REGEXP` searching
-* introduced "did you mean" soundalikes to suggest alternative spellings
-* introduced word stemming
-* the search data source can now build the full entry XML for you

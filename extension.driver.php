@@ -13,8 +13,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Search Index',
-				'version'		=> '0.7.3',
-				'release-date'	=> '2011-04-08',
+				'version'		=> '0.7.4',
+				'release-date'	=> '2011-04-19',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
@@ -27,7 +27,7 @@
 			try {
 				
 				Symphony::Database()->query(
-				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index_filter` (
+				  "CREATE TABLE IF NOT EXISTS `tbl_fields_search_index` (
 					  `id` int(11) unsigned NOT NULL auto_increment,
 					  `field_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
