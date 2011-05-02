@@ -3,6 +3,7 @@
 	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
 	require_once(TOOLKIT . '/class.datasource.php');
 	require_once(TOOLKIT . '/class.fieldmanager.php');
+	require_once(TOOLKIT . '/class.entrymanager.php');
 	
 	Class datasourcesearch extends Datasource{
 		
