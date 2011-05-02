@@ -227,8 +227,9 @@
 					}
 					
 					// append to complete SQL
-					$sql_locate .= '0';
-					$sql_replace .= '0';
+					$sql_locate = ($sql_locate == '') ? $sql_locate = '1' : $sql_locate .= '0';
+					$sql_replace = ($sql_replace == '') ? $sql_replace = '1' : $sql_replace .= '0';
+					$sql_where = ($sql_where == '') ? $sql_where = 'NOT 1' : $sql_where;
 					
 					// trim unnecessary boolean conditions from SQL
 					$sql_where = preg_replace("/ OR $/", "", $sql_where);
