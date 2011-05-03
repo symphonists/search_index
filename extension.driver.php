@@ -14,7 +14,7 @@
 			return array(
 				'name'			=> 'Search Index',
 				'version'		=> '0.8.0',
-				'release-date'	=> '2011-04-19',
+				'release-date'	=> '2011-05-03',
 				'author'		=> array(
 					'name'			=> 'Nick Dunn'
 				),
