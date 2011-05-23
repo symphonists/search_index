@@ -1,8 +1,8 @@
 # Search Index
 
-* Version: 0.8.1
+* Version: 0.8.2
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-05-03
+* Build Date: 2011-05-23
 * Requirements: Symphony 2.2
 
 ## Description
@@ -188,6 +188,15 @@ This allows you to configure word replacements so that commonly mis-spelt terms 
 When a user searches for any of the synonym words, they will be replaced by the replacement word. So if a user searches for `countries in the UK` their search will actually use the phrase `counties in the United Kingdom`. 
 
 Synonym matches are _not_ case-sensitive.
+
+## Auto-complete/auto-suggest
+
+There is a "Search Index Suggestions" data source which can be used for auto-complete search inputs. Attach this data source to a page and pass two GET parameters:
+
+* `keywords` is the keywords to search for (the start of words are matched, less than 3 chars are ignored)
+* `sort` (optional) defaults to `alphabetical` but pass `frequency` to order words by the frequency in which they occur in your index
+
+This extension does not provide the JavaScript "glue" to build the auto-suggest or auto-complete functionality. There are plenty of jQuery plugins to do this for you, and each expect slightly different XML/JSON/plain text, so I have not attempted to implement this for you. Sorry, old chum.
 
 ## Log viewer
 
