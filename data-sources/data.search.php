@@ -87,7 +87,7 @@
 			elseif(!empty($config->{'default-sections'})) {
 				$param_sections = $config->{'default-sections'};
 			} else {
-				$param_sections = array();
+				$param_sections = '';
 			}
 			
 			$sections = array();
