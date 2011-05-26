@@ -65,8 +65,8 @@
 					`keywords`.`keyword`,
 					SUM(`entry_keywords`.`frequency`) AS `frequency`
 				FROM
-					`sym_search_index_keywords` AS `keywords`
-					INNER JOIN `sym_search_index_entry_keywords` AS `entry_keywords` ON (`keywords`.`id` = `entry_keywords`.`keyword_id`)
+					`tbl_search_index_keywords` AS `keywords`
+					INNER JOIN `tbl_search_index_entry_keywords` AS `entry_keywords` ON (`keywords`.`id` = `entry_keywords`.`keyword_id`)
 				WHERE
 					`keywords`.`keyword` LIKE '%s%%'
 				GROUP BY `keywords`.`keyword`
