@@ -178,8 +178,12 @@ Class SearchIndex {
 		
 		// remove as much crap as possible
 		$data = strip_tags($data);
-		$data = strtolower($data);
-		$data = utf8_encode($data);
+		$data = self::strtolower($data);
+		
+		if(!self::is_utf8($data)) {
+			$data = utf8_encode($data);
+		}
+
 		$data = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $data);
 	    $data = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $data);
 		$data = strip_punctuation($data);
@@ -195,7 +199,7 @@ Class SearchIndex {
 			$word = trim($word);
 			
 			// exclude words that are too short or too long
-			if(strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
+			if(strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || self::strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
 				continue;
 			}
 			
@@ -324,7 +328,9 @@ Class SearchIndex {
 		$text = preg_replace("/\n/", '', $text);
 		
 		// remove punctuation for highlighting
-		$keywords = preg_replace("/[^A-Za-z0-9\s]/", '', $keywords);
+		//$keywords = preg_replace("/[^A-Za-z0-9\s]/", '', $keywords);
+		require_once(EXTENSIONS . '/search_index/lib/strip_punctuation.php');
+		$keywords = strip_punctuation($keywords);
 	
 		$string_length = (Symphony::Configuration()->get('excerpt-length', 'search_index')) ? Symphony::Configuration()->get('excerpt-length', 'search_index') : 200;
 		$between_start = $string_length / 2;
@@ -337,7 +343,7 @@ Class SearchIndex {
 	
 		// don't highlight short words
 		foreach($keywords as $i => $keyword) {
-			if (strlen($keyword) < 3) unset($keywords[$i]);
+			if (self::strlen($keyword) < 3) unset($keywords[$i]);
 		}
 
 		// Prepare text
@@ -355,7 +361,7 @@ Class SearchIndex {
 		$length = 0;
 		while ($length < $string_length && count($workkeys)) {
 			foreach ($workkeys as $k => $key) {
-				if (strlen($key) == 0) {
+				if (self::strlen($key) == 0) {
 					unset($workkeys[$k]);
 					unset($keywords[$k]);
 					continue;
@@ -372,9 +378,9 @@ Class SearchIndex {
 				// $q) and behind it (position $s)
 				if (preg_match('/'. $boundary . $key . $boundary .'/iu', $text, $match, PREG_OFFSET_CAPTURE, $included[$key])) {
 					$p = $match[0][1];
-					if (($q = strpos($text, ' ', max(0, $p - $between_start))) !== FALSE) {
-						$end = substr($text, $p, $between_end);
-						if (($s = strrpos($end, ' ')) !== FALSE) {
+					if (($q = self::strpos($text, ' ', max(0, $p - $between_start))) !== FALSE) {
+						$end = self::substr($text, $p, $between_end);
+						if (($s = self::strrpos($end, ' ')) !== FALSE) {
 							$ranges[$q] = $p + $s;
 							$length += $p + $s - $q;
 							$included[$key] = $p + 1;
@@ -395,8 +401,8 @@ Class SearchIndex {
 
 		// If we didn't find anything, return the beginning.
 		if (count($ranges) == 0) {
-			if (strlen($text) > $string_length) {
-				return substr($text, 0, $string_length) . $elipsis;
+			if (self::strlen($text) > $string_length) {
+				return self::substr($text, 0, $string_length) . $elipsis;
 			} else {
 				return $text;
 			}
@@ -427,7 +433,7 @@ Class SearchIndex {
 		// Fetch text
 		$out = array();
 		foreach ($newranges as $from => $to) {
-			$out[] = substr($text, $from, $to - $from);
+			$out[] = self::substr($text, $from, $to - $from);
 		}
 		$text = (isset($newranges[0]) ? '' : $elipsis) . implode($elipsis, $out) . $elipsis;
 
@@ -480,12 +486,12 @@ Class SearchIndex {
 		foreach($keywords as $word) {
 			$boolean_characters = array();
 			preg_match('/^(\-|\+)/', $word, $boolean_characters);
-			$word = strtolower(trim(preg_replace('/^(\-|\+)/', '', $word)));
+			$word = self::strtolower(trim(preg_replace('/^(\-|\+)/', '', $word)));
 			
 			foreach($synonyms as $synonym) {
 				$synonym_terms = explode(',', $synonym['synonyms']);
 				foreach($synonym_terms as $s) {
-					$s = strtolower(trim($s));
+					$s = self::strtolower(trim($s));
 					// replace word with synonym replace word
 					if ($s == $word) $word = $synonym['word'];
 				}
@@ -593,7 +599,7 @@ Class SearchIndex {
 			$keywords = str_replace($matches[0], '', $keywords);
 		}
 		
-		$keywords = strtolower(preg_replace("/[ ]+/", " ", $keywords));
+		$keywords = self::strtolower(preg_replace("/[ ]+/", " ", $keywords));
 		$keywords = trim($keywords);
 		$keywords = explode(' ', $keywords);
 		
@@ -608,12 +614,12 @@ Class SearchIndex {
 		//get all words (both include and exlude)
 		$tmp_include_words = array();
 		while ($i < $limit) {
-			if (substr($keywords[$i], 0, 1) == '+') {
-				$tmp_include_words[] = substr($keywords[$i], 1);
-				$boolean_keywords['highlight'][] = substr($keywords[$i], 1);
+			if (self::substr($keywords[$i], 0, 1) == '+') {
+				$tmp_include_words[] = self::substr($keywords[$i], 1);
+				$boolean_keywords['highlight'][] = self::substr($keywords[$i], 1);
 				if ($stem_words) $boolean_keywords['highlight'][] = PorterStemmer::Stem(substr($keywords[$i], 1));
-			} else if (substr($keywords[$i], 0, 1) == '-') {
-				$boolean_keywords['exclude-word'][] = substr($keywords[$i], 1);
+			} else if (self::substr($keywords[$i], 0, 1) == '-') {
+				$boolean_keywords['exclude-word'][] = self::substr($keywords[$i], 1);
 			} else {
 				$tmp_include_words[] = $keywords[$i];
 				$boolean_keywords['highlight'][] = $keywords[$i];
@@ -623,7 +629,7 @@ Class SearchIndex {
 		}
 
 		foreach ($tmp_include_words as $word) {
-			if(strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
+			if(self::strlen($word) >= (int)Symphony::Configuration()->get('max-word-length', 'search_index') || self::strlen($word) < (int)Symphony::Configuration()->get('min-word-length', 'search_index')) {
 				continue;
 			}
 			$boolean_keywords['include-word'][] = $word;
@@ -642,5 +648,86 @@ Class SearchIndex {
 		return $boolean_keywords;
 		
 	}
+	
+	public static function substr($str, $pos) {
+		if(function_exists('mb_substr')) {
+			return mb_substr($str, $pos);
+		} else {
+			return substr($str, $pos);
+		}
+	}
+	
+	public static function strlen($str) {
+		if(function_exists('mb_strlen')) {
+			return mb_strlen($str);
+		} else {
+			return strlen($str);
+		}
+	}
+	
+	public static function strpos($str1, $str2, $pos) {
+		if(function_exists('mb_strpos')) {
+			return mb_strpos($str1, $str2, $pos);
+		} else {
+			return strpos($str1, $str2, $pos);
+		}
+	}
+	
+	public static function strrpos($str1, $str2) {
+		if(function_exists('mb_strrpos')) {
+			return mb_strrpos($str1, $str2);
+		} else {
+			return strrpos($str1, $str2);
+		}
+	}
+	
+	public static function strtolower($str) {
+		return strtolower($str);
+		// if(function_exists('mb_strtolower')) {
+		// 	return mb_strtolower($str);
+		// } else {
+		// 	return strtolower($str);
+		// }
+	}
+	
+	public static function strtoupper($str) {
+		return strtoupper($str);
+		// if(function_exists('mb_strtoupper')) {
+		// 	return mb_strtoupper($str);
+		// } else {
+		// 	return strtoupper($str);
+		// }
+	}
+	
+	// pinched from FirePHP (FirePHP.class.php)
+	public static function is_utf8($str) {
+		$c = 0;
+		$b = 0;
+		$bits = 0;
+		$len = strlen($str);
+		for($i=0; $i<$len; $i++){
+			$c=ord($str[$i]);
+			if($c > 128){
+				if(($c >= 254)) return false;
+				elseif($c >= 252) $bits=6;
+				elseif($c >= 248) $bits=5;
+				elseif($c >= 240) $bits=4;
+				elseif($c >= 224) $bits=3;
+				elseif($c >= 192) $bits=2;
+				else return false;
+				if(($i+$bits) > $len) return false;
+				while($bits > 1){
+					$i++;
+					$b = ord($str[$i]);
+					if($b < 128 || $b > 191) return false;
+					$bits--;
+				}
+			}
+		}
+		return true;
+	} 
+  
+	
+	
 	
 }

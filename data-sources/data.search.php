@@ -111,10 +111,9 @@
 			$do_stemming = ($config->{'stem-words'} == 'yes') ? TRUE : FALSE;
 			
 			// replace synonyms
-			$keywords = SearchIndex::applySynonyms($param_keywords);			
+			$keywords = SearchIndex::applySynonyms($param_keywords);
 			$keywords_boolean = SearchIndex::parseKeywordString($keywords, $do_stemming);
 			$keywords_highlight = trim(implode(' ', $keywords_boolean['highlight']), '"');
-		
 		
 		// Set up weighting
 		/*-----------------------------------------------------------------------*/
@@ -344,7 +343,7 @@
 			// append input values
 			$result->setAttributeArray(
 				array(
-					'keywords' => General::sanitize($keywords),
+					'keywords' => $keywords,
 					'sort' => General::sanitize($param_sort),
 					'direction' => General::sanitize($param_direction),
 				)

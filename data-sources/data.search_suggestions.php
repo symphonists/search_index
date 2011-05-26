@@ -70,7 +70,8 @@
 				WHERE
 					`keywords`.`keyword` LIKE '%s%%'
 				GROUP BY `keywords`.`keyword`
-				ORDER BY %s",
+				ORDER BY %s
+				LIMIT 0, 50",
 				Symphony::Database()->cleanValue($keywords),
 				$sort
 			);
