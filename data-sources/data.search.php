@@ -343,7 +343,7 @@
 			// append input values
 			$result->setAttributeArray(
 				array(
-					'keywords' => $keywords,
+					'keywords' => General::sanitize($keywords),
 					'sort' => General::sanitize($param_sort),
 					'direction' => General::sanitize($param_direction),
 				)
