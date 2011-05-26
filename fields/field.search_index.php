@@ -4,6 +4,8 @@
 	
 	Class fieldSearch_Index extends Field{	
 		
+		private $keywords_highlight = '';
+		
 		/**
 		* Class constructor
 		*/
@@ -19,13 +21,6 @@
 		*/
 		function canFilter(){
 			return TRUE;
-		}
-		
-		/**
-		* Output elements for Data Source XML
-		*/
-		public function fetchIncludableElements(){
-			return FALSE;
 		}
 		
 		/**
@@ -88,6 +83,29 @@
 		}
 		
 		/**
+		 * Append the formatted xml output of this field as utilized as a data source.
+		 *
+		 * @param XMLElement $wrapper
+		 * @param array $data
+		 * @param boolean $encode (optional)
+		 * @param string $mode
+		 * @param integer $entry_id (optional)
+		 */
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
+			
+			$excerpt = Symphony::Database()->fetchVar('data', 0,
+				sprintf("SELECT data FROM tbl_search_index WHERE entry_id = %d LIMIT 0, 1", $entry_id)
+			);
+			
+			$excerpt = preg_replace("/[\s]{2,}/", ' ', trim($excerpt));
+			$excerpt = SearchIndex::parseExcerpt($this->keywords_highlight, $excerpt);
+			
+			$wrapper->appendChild(
+				new XMLElement($this->get('element_name'), General::sanitize($excerpt))
+			);
+		}
+		
+		/**
 		* Create table to hold field instance's values
 		*/		
 		public function createTable(){
@@ -126,6 +144,7 @@
 			
 			$keywords = SearchIndex::applySynonyms($data);
 			$keywords_boolean = SearchIndex::parseKeywordString($keywords, $do_stemming);
+			$this->keywords_highlight = trim(implode(' ', $keywords_boolean['highlight']), '"');
 			
 			switch($mode) {
 				
