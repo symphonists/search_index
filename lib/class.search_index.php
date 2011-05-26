@@ -178,7 +178,7 @@ Class SearchIndex {
 		
 		// remove as much crap as possible
 		$data = strip_tags($data);
-		$data = self::strtolower($data);
+		$data = strtolower($data);
 		
 		if(!self::is_utf8($data)) {
 			$data = utf8_encode($data);
@@ -328,7 +328,6 @@ Class SearchIndex {
 		$text = preg_replace("/\n/", '', $text);
 		
 		// remove punctuation for highlighting
-		//$keywords = preg_replace("/[^A-Za-z0-9\s]/", '', $keywords);
 		require_once(EXTENSIONS . '/search_index/lib/strip_punctuation.php');
 		$keywords = strip_punctuation($keywords);
 	
@@ -486,12 +485,12 @@ Class SearchIndex {
 		foreach($keywords as $word) {
 			$boolean_characters = array();
 			preg_match('/^(\-|\+)/', $word, $boolean_characters);
-			$word = self::strtolower(trim(preg_replace('/^(\-|\+)/', '', $word)));
+			$word = strtolower(trim(preg_replace('/^(\-|\+)/', '', $word)));
 			
 			foreach($synonyms as $synonym) {
 				$synonym_terms = explode(',', $synonym['synonyms']);
 				foreach($synonym_terms as $s) {
-					$s = self::strtolower(trim($s));
+					$s = strtolower(trim($s));
 					// replace word with synonym replace word
 					if ($s == $word) $word = $synonym['word'];
 				}
@@ -599,7 +598,7 @@ Class SearchIndex {
 			$keywords = str_replace($matches[0], '', $keywords);
 		}
 		
-		$keywords = self::strtolower(preg_replace("/[ ]+/", " ", $keywords));
+		$keywords = strtolower(preg_replace("/[ ]+/", " ", $keywords));
 		$keywords = trim($keywords);
 		$keywords = explode(' ', $keywords);
 		
@@ -649,11 +648,11 @@ Class SearchIndex {
 		
 	}
 	
-	public static function substr($str, $pos) {
+	public static function substr($str, $pos, $length) {
 		if(function_exists('mb_substr')) {
-			return mb_substr($str, $pos);
+			return mb_substr($str, $pos, $length);
 		} else {
-			return substr($str, $pos);
+			return substr($str, $pos, $length);
 		}
 	}
 	
@@ -680,25 +679,7 @@ Class SearchIndex {
 			return strrpos($str1, $str2);
 		}
 	}
-	
-	public static function strtolower($str) {
-		return strtolower($str);
-		// if(function_exists('mb_strtolower')) {
-		// 	return mb_strtolower($str);
-		// } else {
-		// 	return strtolower($str);
-		// }
-	}
-	
-	public static function strtoupper($str) {
-		return strtoupper($str);
-		// if(function_exists('mb_strtoupper')) {
-		// 	return mb_strtoupper($str);
-		// } else {
-		// 	return strtoupper($str);
-		// }
-	}
-	
+		
 	// pinched from FirePHP (FirePHP.class.php)
 	public static function is_utf8($str) {
 		$c = 0;
