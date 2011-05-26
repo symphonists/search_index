@@ -83,6 +83,8 @@
 		
 			if(isset($_GET[$config->{'get-param-sections'}]) && !empty($_GET[$config->{'get-param-sections'}])) {
 				$param_sections = $_GET[$config->{'get-param-sections'}];
+				// allow sections to be sent as an array if the user wishes (multi-select or checkboxes)
+				if(is_array($param_sections)) implode(',', $param_sections);
 			}
 			elseif(!empty($config->{'default-sections'})) {
 				$param_sections = $config->{'default-sections'};
