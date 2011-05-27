@@ -326,6 +326,7 @@ Class SearchIndex {
 	
 		$text = trim($text);
 		$text = preg_replace("/\n/", '', $text);
+		$text = preg_replace("/[\s]{2,}/m", ' ', $text);
 		
 		// remove punctuation for highlighting
 		require_once(EXTENSIONS . '/search_index/lib/strip_punctuation.php');
@@ -334,7 +335,7 @@ Class SearchIndex {
 		$string_length = (Symphony::Configuration()->get('excerpt-length', 'search_index')) ? Symphony::Configuration()->get('excerpt-length', 'search_index') : 200;
 		$between_start = $string_length / 2;
 		$between_end = $string_length / 2;
-		$elipsis = '&#8230;';
+		$elipsis = '__SEARCH_INDEX_ELIPSIS__';
 
 		// Extract positive keywords and phrases
 		preg_match_all('/ ("([^"]+)"|(?!OR)([^" ]+))/', ' '. $keywords, $matches);
@@ -437,11 +438,17 @@ Class SearchIndex {
 		$text = (isset($newranges[0]) ? '' : $elipsis) . implode($elipsis, $out) . $elipsis;
 
 		// Highlight keywords. Must be done at once to prevent conflicts ('strong' and '<strong>').
-		$text = preg_replace('/'. $boundary .'('. implode('|', $keywords) .')'. $boundary .'/iu', '<strong>\0</strong>', $text);
+		$text = preg_replace('/'. $boundary .'('. implode('|', $keywords) .')'. $boundary .'/iu', '__SEARCH_INDEX_START_HIGHLIGHT__\0__SEARCH_INDEX_END_HIGHLIGHT__', $text);
 	
+		$text = preg_replace("/[\s]{2,}/m", ' ', $text);
 		$text = trim($text);
+		
+		$text = General::sanitize($text);
+		$text = preg_replace('/__SEARCH_INDEX_START_HIGHLIGHT__/', '<strong>', $text);
+		$text = preg_replace('/__SEARCH_INDEX_END_HIGHLIGHT__/', '</strong>', $text);
+		$text = preg_replace('/__SEARCH_INDEX_ELIPSIS__/', '&#8230;', $text);
 	
-		return $text;
+		return '<p>' . $text . '</p>';
 	}
 	
 	private static function _parseExcerptReplace(&$text) {
@@ -511,7 +518,22 @@ Class SearchIndex {
 	
 	private static function getLogsSQL($filter_keywords) {
 		$sql = sprintf(
-			"SELECT id, keywords, keywords_manipulated, date, sections, results, MAX(page) as `depth`, session_id FROM `tbl_search_index_logs` %s GROUP BY keywords, session_id",
+			"SELECT
+				id,
+				keywords,
+				keywords_manipulated,
+				date,
+				sections,
+				results,
+				MAX(page) as `depth`,
+				session_id
+			FROM
+				`tbl_search_index_logs`
+			%s
+			GROUP BY
+				keywords,
+				session_id
+			",
 			($filter_keywords ? "WHERE keywords LIKE '%" . $filter_keywords . "%'" : '')
 		);
 		return $sql;

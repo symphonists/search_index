@@ -409,9 +409,8 @@
 				);
 				
 				// add excerpt with highlighted search terms
-				$excerpt = preg_replace("/[\s]{2,}/", ' ', $entry['data']);
-				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $excerpt);
-				$entry_xml->appendChild(new XMLElement('excerpt', General::sanitize($excerpt)));
+				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $entry['data']);
+				$entry_xml->appendChild(new XMLElement('excerpt', $excerpt));
 				
 				// build and append entry data
 				if($build_entries) {

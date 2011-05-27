@@ -97,11 +97,10 @@
 				sprintf("SELECT data FROM tbl_search_index WHERE entry_id = %d LIMIT 0, 1", $entry_id)
 			);
 			
-			$excerpt = preg_replace("/[\s]{2,}/", ' ', trim($excerpt));
 			$excerpt = SearchIndex::parseExcerpt($this->keywords_highlight, $excerpt);
 			
 			$wrapper->appendChild(
-				new XMLElement($this->get('element_name'), General::sanitize($excerpt))
+				new XMLElement($this->get('element_name'), $excerpt)
 			);
 		}
 		
