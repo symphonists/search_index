@@ -39,8 +39,8 @@
 			
 			if($filter_view == 'export') {
 				
-				$file_name = sprintf('%s/search-index.log.%d.csv', TMP, time());
-				$csv = fopen($file_name, 'w');
+				$file_path = sprintf('%s/search-index.log.%d.csv', TMP, time());
+				$csv = fopen($file_path, 'w');
 				
 				fputcsv($csv, array(__('Date'), __('Keywords'), __('Adjusted Keywords'), __('Results'), __('Depth'), __('Session ID')), ',', '"');
 				
@@ -58,9 +58,9 @@
 				fclose($csv);
 				
 				header('Content-type: application/csv');
-				header('Content-Disposition: attachment; filename="' . $file_name . '"');
-				readfile($file_name);
-				unlink($file_name);
+				header('Content-Disposition: attachment; filename="' . end(explode('/', $file_path)) . '"');
+				readfile($file_path);
+				unlink($file_path);
 				
 				exit;
 				
