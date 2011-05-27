@@ -1,8 +1,8 @@
 # Search Index
 
-* Version: 0.8.2
+* Version: 0.8.3
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-05-23
+* Build Date: 2011-05-27
 * Requirements: Symphony 2.2
 
 ## Description
