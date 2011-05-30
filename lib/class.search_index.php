@@ -402,10 +402,11 @@ Class SearchIndex {
 		// If we didn't find anything, return the beginning.
 		if (count($ranges) == 0) {
 			if (self::strlen($text) > $string_length) {
-				return self::substr($text, 0, $string_length) . $elipsis;
-			} else {
-				return $text;
+				$text = self::substr($text, 0, $string_length) . $elipsis; 
 			}
+			$text = General::sanitize($text);
+			$text = preg_replace('/__SEARCH_INDEX_ELIPSIS__/', '&#8230;', $text);
+			return '<p>' . $text . '</p>';
 		}
 
 		// Sort the text ranges by starting position.
