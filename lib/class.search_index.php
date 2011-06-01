@@ -540,7 +540,7 @@ Class SearchIndex {
 		return $sql;
 	}
 	
-	public static function getLogs($sort_column='date', $sort_direction='desc', $page=NULL, $filter_keywords) {
+	public static function getLogs($sort_column='date', $sort_direction='desc', $page=NULL, $filter_keywords=NULL) {
 		$page_size = (int)Symphony::Configuration()->get('pagination_maximum_rows', 'symphony');
 		$start = ($page - 1) * $page_size;
 		if(is_null($page)) {
