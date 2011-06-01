@@ -193,6 +193,17 @@
 					'delegate' => 'EventPostSaveFilter',
 					'callback' => 'indexEntry'
 				),
+				// Dashboard
+				array(
+					'page'		=> '/backend/',
+					'delegate'	=> 'DashboardPanelRender',
+					'callback'	=> 'renderPanel'
+				),
+				array(
+					'page'		=> '/backend/',
+					'delegate'	=> 'DashboardPanelTypes',
+					'callback'	=> 'dashboardPanelTypes'
+				),
 			);
 		}
 		
@@ -242,6 +253,69 @@
 				SearchIndex::deleteIndexByEntry($context['entry_id']);
 			}
 		}
+		
+		/*-------------------------------------------------------------------------
+			Dashboard
+		-------------------------------------------------------------------------*/
+		
+		public function dashboardPanelTypes($context) {
+			$context['types']['search_index'] = "Search Index";
+		}
+
+		public function renderPanel($context) {
+			$config = $context['config'];
+
+			switch($context['type']) {
+				case 'search_index':
+
+					$logs = SearchIndex::getLogs('date', 'desc', 1);
+
+					$thead = array(
+						array(__('Date'), 'col'),
+						array(__('Keywords'), 'col'),
+						array(__('Results'), 'col')
+					);
+					$tbody = array();
+
+					if (!is_array($logs) or empty($logs)) {
+						$tbody = array(Widget::TableRow(array(
+							Widget::TableData(
+								__('No data available.'),
+								'inactive',
+								null,
+								count($thead)
+							)))
+						);
+					}
+					
+					else {
+
+						foreach ($logs as $log) {
+							$tbody[] = Widget::TableRow(
+								array(
+									Widget::TableData(DateTimeObj::get(__SYM_DATETIME_FORMAT__, strtotime($log['date']))),
+									Widget::TableData($log['keywords']),
+									Widget::TableData($log['results'])
+								)
+							);
+						}
+					}
+
+					$table = Widget::Table(
+						Widget::TableHead($thead), null,
+						Widget::TableBody($tbody), null
+					);
+					$table->setAttribute('class', 'skinny');
+
+					$context['panel']->appendChild($table);
+					$context['panel']->appendChild(new XMLElement('p', '<a href="'.(URL . '/symphony/extension/search_index/logs/').'">' . __('View full search logs') . ' &#8594;</a>', array('style' => 'margin:0.7em;text-align:right;')));
+					
+				break;
+
+			}
+			
+		}
+		
 		
 	}
 	
