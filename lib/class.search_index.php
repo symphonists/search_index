@@ -24,7 +24,8 @@ Class SearchIndex {
 		$indexes = Symphony::Configuration()->get('indexes', 'search_index');
 		$indexes = preg_replace("/\\\/",'',$indexes);
 		$unserialised = unserialize($indexes);
-		return unserialize($indexes);
+		if(!is_array($unserialised)) return array();
+		return $unserialised;
 	}
 	
 	/**
