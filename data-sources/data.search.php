@@ -203,8 +203,12 @@
 					
 					// all words to include in the query (single words and phrases)
 					foreach($keywords_boolean['include-words-all'] as $keyword) {
-						$keyword_stem = Symphony::Database()->cleanValue(PorterStemmer::Stem($keyword));
+						$keyword_stem = NULL;
+						
 						$keyword = Symphony::Database()->cleanValue($keyword);
+						if($do_stemming) {
+							$keyword_stem = Symphony::Database()->cleanValue(PorterStemmer::Stem($keyword));
+						}
 						
 						// if the word can be stemmed, look for the word or the stem version
 						if ($do_stemming && ($keyword_stem != $keyword)) {
