@@ -1,8 +1,8 @@
 # Search Index
 
-* Version: 0.9.0
+* Version: 0.9.1
 * Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-06-01
+* Build Date: 2011-07-08
 * Requirements: Symphony 2.2
 
 ## Description
@@ -195,6 +195,7 @@ There is a "Search Index Suggestions" data source which can be used for auto-com
 
 * `keywords` is the keywords to search for (the start of words are matched, less than 3 chars are ignored)
 * `sort` (optional) defaults to `alphabetical` but pass `frequency` to order words by the frequency in which they occur in your index
+* `sections` (optional) a comma-delimited list of section handles to return keywords for (only those with indexes will work) e.g. `articles,comments`. If omitted all indexed sections are used.
 
 This extension does not provide the JavaScript "glue" to build the auto-suggest or auto-complete functionality. There are plenty of jQuery plugins to do this for you, and each expect slightly different XML/JSON/plain text, so I have not attempted to implement this for you. Sorry, old chum.
 

@@ -41,7 +41,7 @@
 			
 			$result = new XMLElement($this->dsParamROOTELEMENT);
 			
-		// Setup
+		// Set up keywords
 		/*-----------------------------------------------------------------------*/	
 
 			$keywords = (string)$_GET['keywords'];
@@ -56,7 +56,30 @@
 			
 			if(strlen($keywords) <= 2) return $result;
 					
-
+			
+		// Set up sections
+		/*-----------------------------------------------------------------------*/	
+		
+			if(isset($_GET['sections'])) {
+				$param_sections = $_GET['sections'];
+				// allow sections to be sent as an array if the user wishes (multi-select or checkboxes)
+				if(is_array($param_sections)) implode(',', $param_sections);
+			} else {
+				$param_sections = '';
+			}
+			
+			$sections = array();
+			foreach(array_map('trim', explode(',', $param_sections)) as $handle) {
+				$section = Symphony::Database()->fetchRow(0,
+					sprintf(
+						"SELECT `id`, `name` FROM `tbl_sections` WHERE handle = '%s' LIMIT 1",
+						Symphony::Database()->cleanValue($handle)
+					)
+				);
+				if ($section) $sections[$section['id']] = array('handle' => $handle, 'name' => $section['name']);
+			}
+			
+		
 		// Build SQL
 		/*-----------------------------------------------------------------------*/	
 			
@@ -67,12 +90,15 @@
 				FROM
 					`tbl_search_index_keywords` AS `keywords`
 					INNER JOIN `tbl_search_index_entry_keywords` AS `entry_keywords` ON (`keywords`.`id` = `entry_keywords`.`keyword_id`)
+					INNER JOIN `sym_entries` AS `entry` ON (`entry_keywords`.`entry_id` = `entry`.`id`)
 				WHERE
 					`keywords`.`keyword` LIKE '%s%%'
+					%s
 				GROUP BY `keywords`.`keyword`
 				ORDER BY %s
 				LIMIT 0, 50",
 				Symphony::Database()->cleanValue($keywords),
+				(count($sections) > 0) ? sprintf('AND `entry`.section_id IN (%s)', implode(',', array_keys($sections))) : NULL,
 				$sort
 			);
 
