@@ -153,7 +153,8 @@
 				
 				case 'LIKE':
 				case 'REGEXP':
-				
+					
+					$has_keywords = FALSE;
 					$sql_where = '';
 					
 					// by default, no wildcard separators
@@ -172,6 +173,7 @@
 					
 					// all words to include in the query (single words and phrases)
 					foreach($keywords_boolean['include-words-all'] as $keyword) {
+						$has_keywords = TRUE;
 						$keyword_stem = NULL;
 						
 						$keyword = Symphony::Database()->cleanValue($keyword);
@@ -189,6 +191,7 @@
 					
 					// all words or phrases that we do not want
 					foreach($keywords_boolean['exclude-words-all'] as $keyword) {
+						$has_keywords = TRUE;
 						$keyword = Symphony::Database()->cleanValue($keyword);
 						$sql_where .= "search_index.data NOT $mode '$prefix$keyword$suffix' AND ";
 					}
@@ -196,8 +199,8 @@
 					// trim unnecessary boolean conditions from SQL
 					$sql_where = preg_replace("/ OR $/", "", $sql_where);
 					$sql_where = preg_replace("/ AND $/", "", $sql_where);
-				
-					$where .= " AND " . $sql_where . " ";
+					
+					if($has_keywords) $where .= " AND " . $sql_where . " ";
 					
 				break;
 			}
