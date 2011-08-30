@@ -354,7 +354,7 @@ Class SearchIndex {
 		$string_length = (Symphony::Configuration()->get('excerpt-length', 'search_index')) ? Symphony::Configuration()->get('excerpt-length', 'search_index') : 200;
 		$between_start = $string_length / 2;
 		$between_end = $string_length / 2;
-		$elipsis = '__SEARCH_INDEX_ELIPSIS__';
+		$elipsis = '...';
 
 		// Extract positive keywords and phrases
 		preg_match_all('/ ("([^"]+)"|(?!OR)([^" ]+))/', ' '. $keywords, $matches);
@@ -424,7 +424,7 @@ Class SearchIndex {
 				$text = self::substr($text, 0, $string_length) . $elipsis; 
 			}
 			$text = General::sanitize($text);
-			$text = preg_replace('/__SEARCH_INDEX_ELIPSIS__/', '&#8230;', $text);
+			$text = preg_replace('/\.\.\./', '&#8230;', $text);
 			return '<p>' . $text . '</p>';
 		}
 
@@ -466,7 +466,7 @@ Class SearchIndex {
 		$text = General::sanitize($text);
 		$text = preg_replace('/__SEARCH_INDEX_START_HIGHLIGHT__/', '<strong>', $text);
 		$text = preg_replace('/__SEARCH_INDEX_END_HIGHLIGHT__/', '</strong>', $text);
-		$text = preg_replace('/__SEARCH_INDEX_ELIPSIS__/', '&#8230;', $text);
+		$text = preg_replace('/\.\.\./', '&#8230;', $text);
 	
 		return '<p>' . $text . '</p>';
 	}
