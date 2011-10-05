@@ -140,7 +140,7 @@
 						$adjusted = __('None');
 						$adjusted_class = 'inactive';
 					}
-					
+
 					$row[] = Widget::TableData(htmlentities($adjusted, ENT_QUOTES), $adjusted_class);
 					$row[] = Widget::TableData($log['results']);
 					$row[] = Widget::TableData($log['depth']);
