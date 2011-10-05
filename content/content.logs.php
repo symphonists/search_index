@@ -132,7 +132,7 @@
 						$keywords_class = 'inactive';
 					}
 					
-					$row[] = Widget::TableData($keywords, $keywords_class);
+					$row[] = Widget::TableData(htmlentities($keywords, ENT_QUOTES), $keywords_class);
 					
 					$adjusted = $log['keywords_manipulated'];
 					$adjusted_class = '';
@@ -141,7 +141,7 @@
 						$adjusted_class = 'inactive';
 					}
 					
-					$row[] = Widget::TableData($adjusted, $adjusted_class);
+					$row[] = Widget::TableData(htmlentities($adjusted, ENT_QUOTES), $adjusted_class);
 					$row[] = Widget::TableData($log['results']);
 					$row[] = Widget::TableData($log['depth']);
 					$row[] = Widget::TableData($log['session_id']);
