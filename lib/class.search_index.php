@@ -659,9 +659,11 @@ Class SearchIndex {
 				$tmp_include_words[] = self::substr($keywords[$i], 1);
 				$boolean_keywords['highlight'][] = self::substr($keywords[$i], 1);
 				if ($stem_words) $boolean_keywords['highlight'][] = PorterStemmer::Stem(substr($keywords[$i], 1));
-			} else if (self::substr($keywords[$i], 0, 1) == '-') {
+			}
+			else if (self::substr($keywords[$i], 0, 1) == '-' && self::substr($keywords[$i], 1) != '') {
 				$boolean_keywords['exclude-word'][] = self::substr($keywords[$i], 1);
-			} else {
+			}
+			else {
 				$tmp_include_words[] = $keywords[$i];
 				$boolean_keywords['highlight'][] = $keywords[$i];
 				if ($stem_words) $boolean_keywords['highlight'][] = PorterStemmer::Stem($keywords[$i]);
@@ -690,7 +692,13 @@ Class SearchIndex {
 		
 	}
 	
-	public static function substr($str, $pos, $length) {
+	public static function substr($str, $pos, $length = null) {
+		// Fixes #23
+		// Substr functions don't handle null parameters as expected
+		if(is_null($length)) {
+			$length = self::strlen($str) - $pos;
+		}
+
 		if(function_exists('mb_substr')) {
 			return mb_substr($str, $pos, $length);
 		} else {
