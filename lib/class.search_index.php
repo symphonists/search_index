@@ -185,7 +185,7 @@ Class SearchIndex {
 		Symphony::Database()->query(sprintf("DELETE FROM `tbl_search_index_entry_keywords` WHERE `entry_id` = %d", $entry_id));
 		// see if each keyword exists for other entries
 		foreach($keywords as $keyword) {
-			$exists = Symphony::Database()->fetchVar('count', 0, sprintf("SELECT COUNT(keyword_id) AS `count` FROM `sym_search_index_entry_keywords` WHERE `keyword_id` = %d AND `entry_id` <> %d", $keyword['keyword_id'], $entry_id));
+			$exists = Symphony::Database()->fetchVar('count', 0, sprintf("SELECT COUNT(keyword_id) AS `count` FROM `tbl_search_index_entry_keywords` WHERE `keyword_id` = %d AND `entry_id` <> %d", $keyword['keyword_id'], $entry_id));
 			if((int)$exists == 0) {
 				Symphony::Database()->query(sprintf("DELETE FROM `tbl_search_index_keywords` WHERE `id` = %d", $keyword['keyword_id']));
 			}
