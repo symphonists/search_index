@@ -437,7 +437,7 @@
 		// Log query
 		/*-----------------------------------------------------------------------*/	
 		
-			if ($config->{'log-keywords'} == 'yes') {
+			if ($config->{'log-keywords'} == 'yes' && trim($keywords)) {
 				
 				$section_handles = array_map('reset', array_values($sections));
 				
