@@ -31,7 +31,9 @@
 					  `id` int(11) unsigned NOT NULL auto_increment,
 					  `field_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
-				  KEY `field_id` (`field_id`))");
+				  KEY `field_id` (`field_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
 				
 				Symphony::Database()->query(
 					"CREATE TABLE IF NOT EXISTS `tbl_search_index` (
@@ -42,7 +44,7 @@
 					  PRIMARY KEY (`id`),
 					  KEY `entry_id` (`entry_id`),
 					  FULLTEXT KEY `data` (`data`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 				);
 				
 				Symphony::Database()->query(
@@ -215,17 +217,20 @@
 				array(
 					'location'	=> __('Search Index'),
 					'name'		=> __('Indexes'),
-					'link'		=> '/indexes/'
+					'link'		=> '/indexes/',
+					'limit'		=> 'developer'
 				),
 				array(
 					'location'	=> __('Search Index'),
 					'name'		=> __('Synonyms'),
-					'link'		=> '/synonyms/'
+					'link'		=> '/synonyms/',
+					'limit'		=> 'developer'
 				),
 				array(
 					'location'	=> __('Search Index'),
 					'name'		=> __('Logs'),
-					'link'		=> '/logs/'
+					'link'		=> '/logs/',
+					'limit'		=> 'developer'
 				),
 			);
 		}
