@@ -7,21 +7,6 @@
 	
 	class Extension_Search_Index extends Extension {
 		
-		/**
-		* Extension meta data
-		*/
-		public function about() {
-			return array(
-				'name'			=> 'Search Index',
-				'version'		=> '0.9.1',
-				'release-date'	=> '2011-07-08',
-				'author'		=> array(
-					'name'			=> 'Nick Dunn'
-				),
-				'description' => 'Index text content of entries for efficient fulltext search.'
-			);
-		}
-		
 		private function createTables() {
 			
 			try {
@@ -187,7 +172,7 @@
 				),
 				array(
 					'page'		=> '/publish/',
-					'delegate'	=> 'Delete',
+					'delegate'	=> 'EntryPreDelete',
 					'callback'	=> 'deleteEntryIndex'
 				),
 				array(
@@ -215,23 +200,26 @@
 		public function fetchNavigation() {
 			return array(
 				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Indexes'),
-					'link'		=> '/indexes/',
-					'limit'		=> 'developer'
-				),
-				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Synonyms'),
-					'link'		=> '/synonyms/',
-					'limit'		=> 'developer'
-				),
-				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Logs'),
-					'link'		=> '/logs/',
-					'limit'		=> 'developer'
-				),
+					'name' => __('Search Index'),
+					'type'		=> 'structure',
+					'children' => array(
+						array(
+							'name'		=> __('Indexes'),
+							'link'		=> '/indexes/',
+							'limit'		=> 'developer'
+						),
+						array(
+							'name'		=> __('Synonyms'),
+							'link'		=> '/synonyms/',
+							'limit'		=> 'developer'
+						),
+						array(
+							'name'		=> __('Logs'),
+							'link'		=> '/logs/',
+							'limit'		=> 'developer'
+						),
+					)
+				)
 			);
 		}
 		
