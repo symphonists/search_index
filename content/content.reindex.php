@@ -8,14 +8,11 @@
 	
 	class contentExtensionSearch_IndexReindex extends AdministrationPage {
 		
-		public function __construct(&$parent){
-			parent::__construct($parent);
-			
-			$sectionManager = new SectionManager(Administration::instance());
-			$this->_entryManager = new EntryManager(Administration::instance());
+		public function __construct(){
+			parent::__construct();
 			
 			// cache array of all sections
-			$this->_sections = $sectionManager->fetch(NULL, 'ASC', 'name');
+			$this->_sections = SectionManager::fetch(NULL, 'ASC', 'name');
 			$this->_section = null;
 			
 			// cache array of all indexes
@@ -43,7 +40,7 @@
 		public function __viewIndex() {
 			
 			// create a DS and filter on System ID of the current entry to build the entry's XML			
-			$ds = new ReindexDataSource(Administration::instance(), NULL, FALSE);
+			$ds = new ReindexDataSource(NULL, FALSE);
 			$ds->dsSource = (string)$_GET['section'];
 			$ds->dsParamFILTERS = $this->_index['filters'];
 			

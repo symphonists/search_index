@@ -11,13 +11,12 @@
 	class contentExtensionSearch_IndexIndexes extends AdministrationPage {
 		protected $_errors = array();
 		
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			
-			$this->_uri = URL . '/symphony/extension/search_index';
+			$this->_uri = SYMPHONY_URL . '/extension/search_index';
 			
-			$sectionManager = new SectionManager(Administration::instance());			
-			$this->_sections = $sectionManager->fetch(NULL, 'ASC', 'name');
+			$this->_sections = SectionManager::fetch(NULL, 'ASC', 'name');
 			
 			$this->_indexes = SearchIndex::getIndexes();
 			
@@ -109,15 +108,15 @@
 		
 		public function __viewEdit() {
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
-			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 101);
 			
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes') . ' &ndash; ' . $this->_section->get('name'));
-			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/indexes/\">" . __('Indexes') . "</a> <span class='meta'>" . $this->_section->get('name') . "</span>");
+			$this->appendSubheading($this->_section->get('name'));
+			$this->insertBreadcrumbs(array(
+				Widget::Anchor(__('Indexes'), $this->_uri . '/indexes/'),
+			));
 			
 			$fields = array('fields' => $this->_section->fetchFields(), 'section' => $this->_section);
-			
-			//var_dump($this->_index);die;
 			
 			$fields_options = array();
 			foreach($fields['fields'] as $f) {				
@@ -136,15 +135,18 @@
 			$fieldset->appendChild($p);
 			
 			$group = new XMLElement('div');
-			$group->setAttribute('class', 'group');
+			$group->setAttribute('class', 'two columns');
 			
+			$div = new XMLElement('div');
+			$div->setAttribute('class', 'column');
 			$label = Widget::Label(__('Included Fields'));
 			$label->appendChild(Widget::Select(
 				'fields[included_elements][]',
 				$fields_options,
 				array('multiple'=>'multiple')
 			));
-			$group->appendChild($label);
+			$div->appendChild($label);
+			$group->appendChild($div);
 			
 			$weighting_options = array();
 			if ($this->_index['weighting'] == NULL) $this->_index['weighting'] = 2;
@@ -156,12 +158,15 @@
 				);
 			}
 			
+			$div = new XMLElement('div');
+			$div->setAttribute('class', 'column');
 			$label = Widget::Label(__('Weighting'));
 			$label->appendChild(Widget::Select(
 				'fields[weighting]',
 				$weighting_options
 			));
-			$group->appendChild($label);
+			$div->appendChild($label);
+			$group->appendChild($div);
 			
 			$fieldset->appendChild($group);
 			$this->Form->appendChild($fieldset);
@@ -173,19 +178,16 @@
 			$p->setAttribute('class', 'help');
 			$fieldset->appendChild($p);
 				
-			$div = new XMLElement('div');
-			$div->setAttribute('class', 'contextual ' . $fields['section']->get('id'));
-			$h3 = new XMLElement('p', __('Filter %s by', array($fields['section']->get('name'))), array('class' => 'label'));
-			$h3->setAttribute('class', 'label');
-			$div->appendChild($h3);
-			
 			$ol = new XMLElement('ol');
 			$ol->setAttribute('class', 'filters-duplicator');
+			$ol->setAttribute('data-add', __('Add filter'));
+			$ol->setAttribute('data-remove', __('Remove filter'));
 			
 			if(isset($this->_index['filters']['id'])){
 				$li = new XMLElement('li');
 				$li->setAttribute('class', 'unique');
-				$li->appendChild(new XMLElement('h4', __('System ID')));
+				$li->setAttribute('data-type', 'id');
+				$li->appendChild(new XMLElement('header', '<h4>' . __('System ID') . '</h4>'));
 				$label = Widget::Label(__('Value'));
 				$label->appendChild(Widget::Input('fields[filter]['.$fields['section']->get('id').'][id]', General::sanitize($this->_index['filters']['id'])));
 				$li->appendChild($label);
@@ -194,7 +196,8 @@
 			
 			$li = new XMLElement('li');
 			$li->setAttribute('class', 'unique template');
-			$li->appendChild(new XMLElement('h4', __('System ID')));
+			$li->setAttribute('data-type', 'id');
+			$li->appendChild(new XMLElement('header', '<h4>' . __('System ID') . '</h4>'));
 			$label = Widget::Label(__('Value'));
 			$label->appendChild(Widget::Input('fields[filter]['.$fields['section']->get('id').'][id]'));
 			$li->appendChild($label);
@@ -208,20 +211,21 @@
 					if(isset($this->_index['filters'][$input->get('id')])){
 						$wrapper = new XMLElement('li');
 						$wrapper->setAttribute('class', 'unique');
+						$wrapper->setAttribute('data-type', $input->get('element_name'));
 						$input->displayDatasourceFilterPanel($wrapper, $this->_index['filters'][$input->get('id')], $this->_errors[$input->get('id')], $fields['section']->get('id'));
 						$ol->appendChild($wrapper);					
 					}
 			
 					$wrapper = new XMLElement('li');
 					$wrapper->setAttribute('class', 'unique template');
+					$wrapper->setAttribute('data-type', $input->get('element_name'));
 					$input->displayDatasourceFilterPanel($wrapper, NULL, NULL, $fields['section']->get('id'));
 					$ol->appendChild($wrapper);
 
 				}
 			}
 			
-			$div->appendChild($ol);
-			$fieldset->appendChild($div);
+			$fieldset->appendChild($ol);
 			$this->Form->appendChild($fieldset);
 			
 			$div = new XMLElement('div');
@@ -242,7 +246,7 @@
 			$this->setPageType('table');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
-			$this->appendSubheading(__('Search Index') . " &rsaquo; " . __('Indexes'));
+			$this->appendSubheading(__('Indexes'));
 			$this->Form->appendChild(new XMLElement('p', __('Configure how each of your sections are indexed. Choose which field text values to index, which entries to index, and the weighting of the section in search results.'), array('class' => 'intro')));
 			
 			$this->addElementToHead(new XMLElement(
@@ -358,8 +362,7 @@
 				array('delete', false, __('Delete')),
 			);
 			
-			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
+			$actions->appendChild(Widget::Apply($options));
 			
 			$this->Form->appendChild($actions);
 
