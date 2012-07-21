@@ -9,8 +9,8 @@
 		/**
 		* Class constructor
 		*/
-		function __construct(&$parent){
-			parent::__construct($parent);
+		function __construct(){
+			parent::__construct();
 			$this->_name = __('Search Index');
 			$this->_required = FALSE;			
 			$this->set('hide', 'no');
@@ -76,7 +76,10 @@
 		* @param string $fieldnamePostfix
 		*/
 		public function displayDatasourceFilterPanel(&$wrapper, $data=NULL, $errors=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-			$wrapper->appendChild(new XMLElement('h4', $this->get('label') . ' <i>'.$this->Name().'</i>'));
+			$header = new XMLElement('header');
+			$header->appendChild(new XMLElement('h4', $this->get('label')));
+			$header->appendChild(new XMLElement('span', $this->name()));
+			$wrapper->appendChild($header);
 			$label = Widget::Label(__('Value'));
 			$label->appendChild(Widget::Input('fields[filter]'.($fieldnamePrefix ? '['.$fieldnamePrefix.']' : '').'['.$this->get('id').']'.($fieldnamePostfix ? '['.$fieldnamePostfix.']' : ''), ($data ? General::sanitize($data) : NULL)));	
 			$wrapper->appendChild($label);
