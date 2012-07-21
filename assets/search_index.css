@@ -7,22 +7,9 @@ td.count-column {
 	width: 200px;
 }
 
-span#search-index-config {
-	display: none;
-}
-
 p.intro {
-	margin: 0 19px 10px 19px;
+	margin: 10px 19px;
 	color: #887;
-}
-
-.search-index-log-filters {
-	margin: 0.5em 0 1.75em 0;
-    padding: 0 19px 1em 19px;
-    vertical-align: middle;
-    border-bottom: 1px solid #e6e6e5;
-	-moz-box-shadow: 0 3px 8px #f5f5f4;
-	-webkit-box-shadow: 0 3px 8px #f5f5f4;
 }
 
 .search-index-log-filters label {
@@ -38,10 +25,6 @@ p.intro {
 .search-index-log-filters p {
 	margin-left: 0;
 	margin-bottom: 0;
-}
-
-h2 {
-	line-height: 1 !important;
 }
 
 h2 span.meta {
