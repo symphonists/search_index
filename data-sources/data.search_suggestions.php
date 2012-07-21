@@ -11,8 +11,8 @@
 		public $dsParamLIMIT = '1';
 		public $dsParamSTARTPAGE = '1';
 		
-		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
+		public function __construct($env=NULL, $process_params=true){
+			parent::__construct($env, $process_params);
 		}
 		
 		public static function sortWordDistance($a, $b) {

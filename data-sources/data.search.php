@@ -11,8 +11,8 @@
 		public $dsParamLIMIT = '1';
 		public $dsParamSTARTPAGE = '1';
 		
-		public function __construct(&$parent, $env=NULL, $process_params=true){
-			parent::__construct($parent, $env, $process_params);
+		public function __construct($env=NULL, $process_params=true){
+			parent::__construct($env, $process_params);
 		}
 		
 		public static function sortWordDistance($a, $b) {
@@ -390,8 +390,6 @@
 			// supplement with the necessary fields
 			$build_entries = ($config->{'build-entries'} == 'yes') ? TRUE : FALSE;
 			if($build_entries) {
-				$em = new EntryManager(Frontend::instance());
-				$fm = new FieldManager(Frontend::instance());
 				$field_pool = array();
 			}
 			
@@ -418,11 +416,11 @@
 				
 				// build and append entry data
 				if($build_entries) {
-					$e = reset($em->fetch($entry['entry_id']));
+					$e = reset(EntryManager::fetch($entry['entry_id']));
 					$data = $e->getData();
 					foreach($data as $field_id => $values){
 						if(!isset($field_pool[$field_id]) || !is_object($field_pool[$field_id])) {
-							$field_pool[$field_id] = $em->fieldManager->fetch($field_id);
+							$field_pool[$field_id] = FieldManager::fetch($field_id);
 						}
 						$field_pool[$field_id]->appendFormattedElement($entry_xml, $values, FALSE, NULL, $e->get('id'));
 					}
