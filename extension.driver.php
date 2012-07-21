@@ -172,7 +172,7 @@
 				),
 				array(
 					'page'		=> '/publish/',
-					'delegate'	=> 'EntryPreDelete',
+					'delegate'	=> 'EntryPostDelete',
 					'callback'	=> 'deleteEntryIndex'
 				),
 				array(
