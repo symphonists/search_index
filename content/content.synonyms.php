@@ -6,10 +6,10 @@
 	class contentExtensionSearch_IndexSynonyms extends AdministrationPage {
 		protected $_errors = array();
 		
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			
-			$this->_uri = URL . '/symphony/extension/search_index';
+			$this->_uri = SYMPHONY_URL . '/extension/search_index';
 			
 			$this->_synonyms = SearchIndex::getSynonyms();
 			$this->_synonym = NULL;
@@ -66,11 +66,16 @@
 		
 		public function __viewEdit() {
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
-			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 101);
+			// $this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 101);
 
 			$this->setPageType('form');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
-			$this->appendSubheading(__('Search Index') . " &rsaquo; <a href=\"{$this->_uri}/synonyms/\">" . __('Synonyms') . "</a>" . (!is_null($this->_synonym) ? ' <span class="meta">' . $this->_synonym['word'] . '</span>' : ''));
+			
+			$subheading = !empty($this->_synonym['word']) ? $this->_synonym['word'] : __('Untitled');
+			$this->appendSubheading($subheading);
+			$this->insertBreadcrumbs(array(
+				Widget::Anchor(__('Synonyms'), $this->_uri . '/synonyms/'),
+			));
 			
 			$fieldset = new XMLElement('fieldset');
 			$fieldset->setAttribute('class', 'settings');
@@ -127,14 +132,13 @@
 			$this->setPageType('table');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
 			
-			$this->appendSubheading(
-				__('Search Index') . " &rsaquo; " . __('Synonyms') . 
-				Widget::Anchor(__('Create New'), Administration::instance()->getCurrentPageURL().'edit/', __('Create New'), 'create button')->generate()
+			$this->appendSubheading(__('Synonyms'),
+				Widget::Anchor(__('Create New'), $this->_uri . '/synonyms/edit/', __('Create New Synonym'), 'button create')
 			);
+
 			$this->Form->appendChild(new XMLElement('p', __('Configure synonym expansion, so that common misspellings or variations of phrases can be normalised to a single phrase.'), array('class' => 'intro')));
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
-			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
 			$tableHead = array();
 			$tableBody = array();
@@ -179,8 +183,7 @@
 				array('delete', FALSE, __('Delete')),
 			);
 			
-			$actions->appendChild(Widget::Select('with-selected', $options));
-			$actions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
+			$actions->appendChild(Widget::Apply($options));
 			
 			$this->Form->appendChild($actions);
 

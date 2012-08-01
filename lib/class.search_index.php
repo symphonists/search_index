@@ -1,8 +1,10 @@
 <?php
 
+include_once(TOOLKIT . '/class.entrymanager.php');
+include_once(TOOLKIT . '/class.fieldmanager.php');
+
 Class SearchIndex {
 	
-	private static $_entry_manager = NULL;
 	private static $_entry_xml_datasource = NULL;
 	
 	private static $_where = NULL;
@@ -12,9 +14,7 @@ Class SearchIndex {
 	* Set up static members
 	*/
 	private function assert() {
-		require_once(TOOLKIT . '/class.entrymanager.php');
-		if (self::$_entry_manager == NULL) self::$_entry_manager = new EntryManager(Symphony::Engine());
-		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(Symphony::Engine(), NULL, FALSE);
+		if (self::$_entry_xml_datasource == NULL) self::$_entry_xml_datasource = new EntryXMLDataSource(NULL, FALSE);
 	}
 	
 	/**
@@ -87,7 +87,7 @@ Class SearchIndex {
 						else $value = $filter;
 
 						if(!isset($fieldPool[$field_id]) || !is_object($fieldPool[$field_id]))
-							$fieldPool[$field_id] =& self::$_entry_manager->fieldManager->fetch($field_id);
+							$fieldPool[$field_id] =& FieldManager::fetch($field_id);
 
 						if($field_id != 'id' && !($fieldPool[$field_id] instanceof Field)){
 							throw new Exception(
@@ -111,7 +111,7 @@ Class SearchIndex {
 			}
 
 			// run entry though filters
-			$entry_prefilter = self::$_entry_manager->fetch($entry, $section, 1, 0, self::$_where, self::$_joins, FALSE, FALSE);
+			$entry_prefilter = EntryManager::fetch($entry, $section, 1, 0, self::$_where, self::$_joins, FALSE, FALSE);
 
 			// if no entry found, it didn't pass the pre-filtering
 			if (empty($entry_prefilter)) return;

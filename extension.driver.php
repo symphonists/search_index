@@ -7,21 +7,6 @@
 	
 	class Extension_Search_Index extends Extension {
 		
-		/**
-		* Extension meta data
-		*/
-		public function about() {
-			return array(
-				'name'			=> 'Search Index',
-				'version'		=> '0.9.1',
-				'release-date'	=> '2011-07-08',
-				'author'		=> array(
-					'name'			=> 'Nick Dunn'
-				),
-				'description' => 'Index text content of entries for efficient fulltext search.'
-			);
-		}
-		
 		private function createTables() {
 			
 			try {
@@ -31,7 +16,9 @@
 					  `id` int(11) unsigned NOT NULL auto_increment,
 					  `field_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
-				  KEY `field_id` (`field_id`))");
+				  KEY `field_id` (`field_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+				);
 				
 				Symphony::Database()->query(
 					"CREATE TABLE IF NOT EXISTS `tbl_search_index` (
@@ -42,7 +29,7 @@
 					  PRIMARY KEY (`id`),
 					  KEY `entry_id` (`entry_id`),
 					  FULLTEXT KEY `data` (`data`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 				);
 				
 				Symphony::Database()->query(
@@ -185,7 +172,7 @@
 				),
 				array(
 					'page'		=> '/publish/',
-					'delegate'	=> 'Delete',
+					'delegate'	=> 'EntryPostDelete',
 					'callback'	=> 'deleteEntryIndex'
 				),
 				array(
@@ -213,20 +200,26 @@
 		public function fetchNavigation() {
 			return array(
 				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Indexes'),
-					'link'		=> '/indexes/'
-				),
-				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Synonyms'),
-					'link'		=> '/synonyms/'
-				),
-				array(
-					'location'	=> __('Search Index'),
-					'name'		=> __('Logs'),
-					'link'		=> '/logs/'
-				),
+					'name' => __('Search Index'),
+					'type'		=> 'structure',
+					'children' => array(
+						array(
+							'name'		=> __('Indexes'),
+							'link'		=> '/indexes/',
+							'limit'		=> 'developer'
+						),
+						array(
+							'name'		=> __('Synonyms'),
+							'link'		=> '/synonyms/',
+							'limit'		=> 'developer'
+						),
+						array(
+							'name'		=> __('Logs'),
+							'link'		=> '/logs/',
+							'limit'		=> 'developer'
+						),
+					)
+				)
 			);
 		}
 		

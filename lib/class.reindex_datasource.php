@@ -10,15 +10,15 @@ Class ReindexDataSource extends Datasource{
 	#public $dsParamORDER = 'asc';
 	public $dsParamLIMIT = '20';
 	public $dsParamREDIRECTONEMPTY = 'no';
-	#public $dsParamSORT = 'system:id';
+	public $dsParamSORT = 'system:id';
 	public $dsParamSTARTPAGE = '1';
 	public $dsParamPAGINATERESULTS = 'yes';
 	
 	public $dsParamINCLUDEDELEMENTS = array('system:pagination');
 	public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 	
-	public function __construct(&$parent, $env=NULL, $process_params=TRUE){
-		parent::__construct($parent, $env, $process_params);
+	public function __construct($env=NULL, $process_params=TRUE){
+		parent::__construct($env, $process_params);
 	}
 	
 	public function getSource(){

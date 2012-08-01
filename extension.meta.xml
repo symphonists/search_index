@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="search_index" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+	<name>Search Index</name>
+	<description>Index text content of entries for efficient fulltext search.</description>
+	<repo type="github">https://github.com/symphonists/search_index</repo>
+	<types>
+		<type>Search</type>
+	</types>
+	<authors>
+		<author>
+			<name github="nickdunn" symphony="nickdunn">Nick Dunn</name>
+			<website>http://nick-dunn.co.uk</website>
+		</author>
+		<author>
+			<name github="symphonists" symphony="community">Symphony Community</name>
+		</author>
+	</authors>
+	<releases>
+		<release version="0.9.2" date="2012-07-21" min="2.3"/>
+		<release version="0.9.1" date="2011-07-08" min="2.2.5" max="2.2.5"/>
+	</releases>
+</extension>

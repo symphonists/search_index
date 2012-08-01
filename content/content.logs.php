@@ -6,18 +6,11 @@
 	class contentExtensionSearch_IndexLogs extends AdministrationPage {
 		protected $_errors = array();
 		
-		public function __construct(&$parent){
-			parent::__construct($parent);			
-			$this->_uri = URL . '/symphony/extension/search_index';
+		public function __construct(){
+			parent::__construct();			
+			$this->_uri = SYMPHONY_URL . '/extension/search_index';
 		}
 		
-		public function build($context) {
-			if (isset($_POST['filter']['keyword']) != '') {
-				redirect(Administration::instance()->getCurrentPageURL() . '?keywords=' . $_POST['keywords']);
-			}
-			parent::build($context);
-		}
-						
 		public function __viewIndex() {
 			$this->setPageType('table');
 			$this->setTitle(__('Symphony') . ' &ndash; ' . __('Search Indexes'));
@@ -71,14 +64,18 @@
 			$total = SearchIndex::countLogs($filter_keywords);
 			$pages = ceil($total / $page_size);
 			
-			$this->appendSubheading(
-				__('Search Index') . " &rsaquo; " . __('Logs') . 
-				Widget::Anchor(
-					__('Export CSV'),
-					Administration::instance()->getCurrentPageURL(). '?view=export&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords,
-					NULL,
-					'button'
-				)->generate()
+			$filter_form = Widget::Form($this->_uri . '/logs/', 'get');
+			$filters = new XMLElement('div', NULL, array('class' => 'search-index-log-filters'));
+			$label = new XMLElement('label', __('Filter searches containing the keywords %s', array(Widget::Input('keywords', $filter_keywords)->generate())));
+			$filters->appendChild($label);
+			$filters->appendChild(new XMLElement('input', NULL, array('type' => 'submit', 'value' => __('Filter'), 'class' => 'create button')));
+			$filters->appendChild(Widget::Anchor(__('Clear'), $this->_uri . '/logs/', NULL, 'button clear'));
+			$filter_form->appendChild($filters);
+			
+			$this->insertDrawer(Widget::Drawer('search_index', __('Filter Logs'), $filter_form, 'opened'), 'horizontal');
+
+			$this->appendSubheading(__('Logs'),
+				Widget::Anchor(__('Export CSV'), $this->_uri . '/logs/?view=export&amp;sort='.$sort_column.'&amp;order='.$sort_order.'&amp;keywords='.$filter_keywords, NULL, 'button')
 			);
 			
 			$stats = array(
@@ -89,16 +86,8 @@
 			);
 			
 			$this->addStylesheetToHead(URL . '/extensions/search_index/assets/search_index.css', 'screen', 100);
-			$this->addScriptToHead(URL . '/extensions/search_index/assets/search_index.js', 100);
 			
-			$filters = new XMLElement('div', NULL, array('class' => 'search-index-log-filters'));
-			$label = new XMLElement('label', __('Filter searches containing the keywords %s', array(Widget::Input('keywords', $filter_keywords)->generate())));
-			$filters->appendChild($label);
-			$filters->appendChild(new XMLElement('input', NULL, array('type' => 'submit', 'value' => __('Filter'), 'name' => 'filter[keyword]')));
-			
-			$filters->appendChild(new XMLElement('p', sprintf(__('<strong>%s</strong> unique searches from <strong>%s</strong> unique users via <strong>%s</strong> distinct search terms. Each search yielded an average of <strong>%s</strong> results.', array($stats['unique-searches'], $stats['unique-users'], $stats['unique-terms'], $stats['average-results']))), array('class' => 'intro')));
-			
-			$this->Form->appendChild($filters);
+			$this->Form->appendChild(new XMLElement('p', sprintf(__('<strong>%s</strong> unique searches from <strong>%s</strong> unique users via <strong>%s</strong> distinct search terms. Each search yielded an average of <strong>%s</strong> results.', array($stats['unique-searches'], $stats['unique-users'], $stats['unique-terms'], $stats['average-results']))), array('class' => 'intro')));
 			
 			$tableHead = array();
 			$tableBody = array();
@@ -186,12 +175,22 @@
 				$ul->appendChild($li);
 
 				## Summary
-				$li = new XMLElement('li', __('Page %1$s of %2$s', array($page, max($page, $pages))));
+				$li = new XMLElement('li');
 				$li->setAttribute('title', __('Viewing %1$s - %2$s of %3$s entries', array(
 					$start,
 					$end,
 					$total
 				)));
+
+				$pgform = Widget::Form(Administration::instance()->getCurrentPageURL(), 'get', 'paginationform');
+				$pgmax = max($page, $pages);
+				$pgform->appendChild(Widget::Input('pg', NULL, 'text', array(
+					'data-active' => __('Go to page …'),
+					'data-inactive' => __('Page %1$s of %2$s', array((string)$page, $pgmax)),
+					'data-max' => $pgmax
+				)));
+
+				$li->appendChild($pgform);
 				$ul->appendChild($li);
 
 				## Next
@@ -212,7 +211,7 @@
 				}				
 				$ul->appendChild($li);
 				
-				$this->Form->appendChild($ul);	
+				$this->Contents->appendChild($ul);
 			}
 
 		}

@@ -14,8 +14,8 @@ Class EntryXMLDataSource extends Datasource{
 	public $dsParamSTARTPAGE = '1';
 	public $dsParamASSOCIATEDENTRYCOUNTS = 'no';
 	
-	public function __construct(&$parent, $env=NULL, $process_params=TRUE){
-		parent::__construct($parent, $env, $process_params);
+	public function __construct($env=NULL, $process_params=true){
+		parent::__construct($env, $process_params);
 	}
 	
 	public function getSource(){
