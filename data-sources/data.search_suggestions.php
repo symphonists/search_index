@@ -90,7 +90,7 @@
 				FROM
 					`tbl_search_index_keywords` AS `keywords`
 					INNER JOIN `tbl_search_index_entry_keywords` AS `entry_keywords` ON (`keywords`.`id` = `entry_keywords`.`keyword_id`)
-					INNER JOIN `sym_entries` AS `entry` ON (`entry_keywords`.`entry_id` = `entry`.`id`)
+					INNER JOIN `tbl_entries` AS `entry` ON (`entry_keywords`.`entry_id` = `entry`.`id`)
 				WHERE
 					`keywords`.`keyword` LIKE '%s%%'
 					%s
