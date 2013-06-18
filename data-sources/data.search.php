@@ -2,16 +2,14 @@
 	
 	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
 	require_once(TOOLKIT . '/class.datasource.php');
-	require_once(TOOLKIT . '/class.fieldmanager.php');
-	require_once(TOOLKIT . '/class.entrymanager.php');
 	
-	Class datasourcesearch extends Datasource{
+	Class datasourcesearch extends SectionDatasource {
 		
 		public $dsParamROOTELEMENT = 'search';
 		public $dsParamLIMIT = '1';
 		public $dsParamSTARTPAGE = '1';
 		
-		public function __construct($env=NULL, $process_params=true){
+		public function __construct($env=NULL, $process_params=true) {
 			parent::__construct($env, $process_params);
 		}
 		
@@ -26,7 +24,7 @@
 							'name' => 'Nick Dunn',
 							'website' => 'http://nick-dunn.co.uk'
 						)
-					);	
+					);
 		}
 		
 		public function getSource(){
@@ -43,14 +41,14 @@
 			return $result;
 		}
 		
-		public function grab(&$param_pool) {
+		public function execute(array &$param_pool = null) {
 			
 			$result = new XMLElement($this->dsParamROOTELEMENT);
 			$config = (object)Symphony::Configuration()->get('search_index');
 			
 			
 		// Setup
-		/*-----------------------------------------------------------------------*/	
+		/*-----------------------------------------------------------------------*/
 			
 			// look for key in GET array if it's specified
 			if (!empty($config->{'get-param-prefix'})) {
@@ -106,8 +104,8 @@
 			if (count($sections) == 0) return $this->errorXML('Invalid search sections');
 		
 		
-		// Set up and manipulate keywords	
-		/*-----------------------------------------------------------------------*/	
+		// Set up and manipulate keywords
+		/*-----------------------------------------------------------------------*/
 			
 			// should we apply word stemming?
 			$do_stemming = ($config->{'stem-words'} == 'yes') ? TRUE : FALSE;
@@ -145,19 +143,19 @@
 				case 'FULLTEXT':
 				
 					$sql = sprintf(
-						"SELECT 
-							SQL_CALC_FOUND_ROWS 
+						"SELECT
+							SQL_CALC_FOUND_ROWS
 							e.id as `entry_id`,
 							data,
 							e.section_id as `section_id`,
 							UNIX_TIMESTAMP(e.creation_date) AS `creation_date`,
 							(
-								MATCH(index.data) AGAINST ('%1\$s') * 
+								MATCH(index.data) AGAINST ('%1\$s') *
 								CASE
 									%2\$s
 									ELSE 1
 								END
-								%3\$s						
+								%3\$s
 							) AS `score`
 						FROM
 							tbl_search_index as `index`
@@ -382,8 +380,8 @@
 			$result->appendChild($sections_xml);
 		
 		
-		// Append entries to XML, build if desired	
-		/*-----------------------------------------------------------------------*/	
+		// Append entries to XML, build if desired
+		/*-----------------------------------------------------------------------*/
 			
 			// if true then the entire entry will be appended to the XML. If not, only
 			// a "stub" of the entry ID is provided, allowing other data sources to
@@ -411,7 +409,7 @@
 				);
 				
 				// add excerpt with highlighted search terms
-				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $entry['data']);
+				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, html_entity_decode($entry['data']));
 				$entry_xml->appendChild(new XMLElement('excerpt', $excerpt));
 				
 				// build and append entry data
@@ -430,10 +428,10 @@
 			}
 			
 			// send entry IDs as Output Parameterss
-			$param_pool['ds-' . $this->dsParamROOTELEMENT] = $param_output;
-		
+			$param_pool['ds-' . $this->dsParamROOTELEMENT . '.id'] = $param_output;
+	
 		// Log query
-		/*-----------------------------------------------------------------------*/	
+		/*-----------------------------------------------------------------------*/
 		
 			if ($config->{'log-keywords'} == 'yes' && trim($keywords)) {
 				
@@ -464,7 +462,7 @@
 				
 			}
 		
-			return $result;		
+			return $result;
 
 		}
 	
