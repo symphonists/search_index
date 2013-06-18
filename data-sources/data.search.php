@@ -420,7 +420,7 @@
 						if(!isset($field_pool[$field_id]) || !is_object($field_pool[$field_id])) {
 							$field_pool[$field_id] = FieldManager::fetch($field_id);
 						}
-						$field_pool[$field_id]->appendFormattedElement($entry_xml, $values, FALSE, NULL, $e->get('id'));
+						$field_pool[$field_id]->appendFormattedElement($entry_xml, $values, FALSE, 'formatted', $e->get('id'));
 					}
 				}
 				
