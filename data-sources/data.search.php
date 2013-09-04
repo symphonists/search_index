@@ -409,9 +409,12 @@
 				);
 				
 				// add excerpt with highlighted search terms
-				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, html_entity_decode($entry['data']));
+				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $entry['data']);
+				$excerpt = html_entity_decode($excerpt);
+				$excerpt = utf8_encode($excerpt);
 				$entry_xml->appendChild(new XMLElement('excerpt', $excerpt));
 				
+ 
 				// build and append entry data
 				if($build_entries) {
 					$e = reset(EntryManager::fetch($entry['entry_id']));
