@@ -36,7 +36,7 @@ Class SearchIndex {
 	public static function saveIndexes($indexes) {
 		self::assert();
 		Symphony::Configuration()->set('indexes', stripslashes(serialize($indexes)), 'search_index');
-		Symphony::Engine()->saveConfig();
+		Symphony::Configuration()->write();
 	}
 	
 	/**
