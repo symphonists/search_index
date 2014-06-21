@@ -346,11 +346,13 @@
 			}
 			
 			$table = Widget::Table(
-				Widget::TableHead($tableHead), null, 
+				Widget::TableHead($tableHead),
+				NULL,
 				Widget::TableBody($tableBody),
-				'selectable'
+				'selectable',
+				null,
+				array('role' => 'directory', 'aria-labelledby' => 'symphony-subheading', 'data-interactive' => 'data-interactive')
 			);
-			
 			$this->Form->appendChild($table);
 			
 			$actions = new XMLElement('div');
