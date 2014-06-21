@@ -104,7 +104,7 @@
 			Symphony::Configuration()->set('mode', 'like', 'search_index');
 			Symphony::Configuration()->set('log-keywords', 'yes', 'search_index');
 						
-			Administration::instance()->saveConfig();
+			Symphony::Configuration()->write();
 			
 		}
 
