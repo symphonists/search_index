@@ -495,7 +495,7 @@ Class SearchIndex {
 	public static function saveSynonyms($synonyms) {
 		self::assert();
 		Symphony::Configuration()->set('synonyms', stripslashes(serialize($synonyms)), 'search_index');
-		Symphony::Engine()->saveConfig();
+		Symphony::Configuration()->write();
 	}
 	
 	private static function sortSynonymsCallback($a, $b) {
