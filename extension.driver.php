@@ -140,7 +140,7 @@
 		public function uninstall(){
 			
 			Symphony::Configuration()->remove('search_index');			
-			Administration::instance()->saveConfig();
+			Symphony::Configuration()->write();
 			
 			try{
 				Symphony::Database()->query("DROP TABLE `tbl_search_index`");
