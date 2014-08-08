@@ -41,6 +41,15 @@
 			return $result;
 		}
 		
+		private function fixEncoding($in_str) { 
+			$cur_encoding = mb_detect_encoding($in_str);
+			if($cur_encoding == "UTF-8" && mb_check_encoding($in_str,"UTF-8")) {
+				return $in_str; 
+			} else {
+				return utf8_encode($in_str);
+			}
+		}
+
 		public function execute(array &$param_pool = null) {
 			
 			$result = new XMLElement($this->dsParamROOTELEMENT);
@@ -411,9 +420,8 @@
 				// add excerpt with highlighted search terms
 				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $entry['data']);
 				$excerpt = html_entity_decode($excerpt);
-				$excerpt = utf8_encode($excerpt);
+				$excerpt = $this->fixEncoding($excerpt);
 				$entry_xml->appendChild(new XMLElement('excerpt', $excerpt));
-				
  
 				// build and append entry data
 				if($build_entries) {

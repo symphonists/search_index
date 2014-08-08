@@ -2,7 +2,7 @@
 
 require_once(TOOLKIT . '/class.datasource.php');
 
-Class EntryXMLDataSource extends Datasource{
+Class EntryXMLDataSource extends SectionDatasource{
 	
 	public $dsParamROOTELEMENT = 'entries';
 	public $dsSource = NULL;
@@ -22,21 +22,25 @@ Class EntryXMLDataSource extends Datasource{
 		return $this->dsSource;
 	}
 	
-	public function grab(&$param_pool){
-
+	public function execute(array &$param_pool = null) {
 		$result = new XMLElement($this->dsParamROOTELEMENT);
-		
+
 		try{
-			include(TOOLKIT . '/data-sources/datasource.section.php');
+			$result = parent::execute($param_pool);
+		}
+		catch(FrontendPageNotFoundException $e){
+			// Work around. This ensures the 404 page is displayed and
+			// is not picked up by the default catch() statement below
+			FrontendPageNotFoundExceptionHandler::render($e);
 		}
 		catch(Exception $e){
-			$result->appendChild(new XMLElement('error', $e->getMessage()));
+			$result->appendChild(new XMLElement('error', $e->getMessage() . ' on ' . $e->getLine() . ' of file ' . $e->getFile()));
 			return $result;
 		}
+
 		if($this->_force_empty_result) $result = $this->emptyXMLSet();
 
-		return $result;		
-
+		return $result;
 	}
 	
 }

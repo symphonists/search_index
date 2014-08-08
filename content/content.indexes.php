@@ -65,11 +65,11 @@
 							// ignore if no index is set for a selected section
 							if (is_null($this->_index)) continue;
 							
-							SearchIndex::deleteIndexBySection($section_id);							
+							SearchIndex::deleteIndexBySection($section_id);
 							unset($this->_indexes[$section_id]);
 							SearchIndex::saveIndexes($this->_indexes);
 							
-						}						
+						}
 						redirect("{$this->_uri}/indexes/");
 						break;
 						
@@ -87,7 +87,7 @@
 			
 			$fields = $_POST['fields'];
 			
-			$is_new = !isset($this->_indexes[$this->_section->get('id')]);			
+			$is_new = !isset($this->_indexes[$this->_section->get('id')]);
 			
 			$this->_indexes[$this->_section->get('id')]['fields'] = $fields['included_elements'];
 			$this->_indexes[$this->_section->get('id')]['weighting'] = $fields['weighting'];
@@ -119,7 +119,7 @@
 			$fields = array('fields' => $this->_section->fetchFields(), 'section' => $this->_section);
 			
 			$fields_options = array();
-			foreach($fields['fields'] as $f) {				
+			foreach($fields['fields'] as $f) {
 				$fields_options[] = array(
 					$f->get('element_name'),
 					in_array($f->get('element_name'), $this->_index['fields']),
@@ -177,9 +177,13 @@
 			$p = new XMLElement('p', __('Only entries that pass these filters will be indexed.'));
 			$p->setAttribute('class', 'help');
 			$fieldset->appendChild($p);
-				
+
+			$div = new XMLElement('div');
+			$div->setAttribute('class', 'contextual frame filters-duplicator');
+			$div->setAttribute('data-interactive', 'data-interactive');
+			
 			$ol = new XMLElement('ol');
-			$ol->setAttribute('class', 'filters-duplicator');
+			$ol->setAttribute('data-interactive', 'data-interactive');
 			$ol->setAttribute('data-add', __('Add filter'));
 			$ol->setAttribute('data-remove', __('Remove filter'));
 			
@@ -213,7 +217,7 @@
 						$wrapper->setAttribute('class', 'unique');
 						$wrapper->setAttribute('data-type', $input->get('element_name'));
 						$input->displayDatasourceFilterPanel($wrapper, $this->_index['filters'][$input->get('id')], $this->_errors[$input->get('id')], $fields['section']->get('id'));
-						$ol->appendChild($wrapper);					
+						$ol->appendChild($wrapper);
 					}
 			
 					$wrapper = new XMLElement('li');
@@ -225,7 +229,8 @@
 				}
 			}
 			
-			$fieldset->appendChild($ol);
+			$div->appendChild($ol);
+			$fieldset->appendChild($div);
 			$this->Form->appendChild($fieldset);
 			
 			$div = new XMLElement('div');

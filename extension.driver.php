@@ -17,7 +17,7 @@
 					  `field_id` int(11) unsigned NOT NULL,
 				  PRIMARY KEY  (`id`),
 				  KEY `field_id` (`field_id`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 				);
 				
 				Symphony::Database()->query(
@@ -29,7 +29,7 @@
 					  PRIMARY KEY (`id`),
 					  KEY `entry_id` (`entry_id`),
 					  FULLTEXT KEY `data` (`data`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 				);
 				
 				Symphony::Database()->query(
@@ -37,14 +37,14 @@
 					  `id` int(11) NOT NULL auto_increment,
 					  `date` datetime NOT NULL,
 					  `keywords` varchar(255) default NULL,
-					  `keywords_manipulated` varchar(255) default NULL,				  
+					  `keywords_manipulated` varchar(255) default NULL,
 					  `sections` varchar(255) default NULL,
 					  `page` int(11) NOT NULL,
 					  `results` int(11) default NULL,
 					  `session_id` varchar(255) default NULL,
 					  PRIMARY KEY  (`id`),
 					  FULLTEXT KEY `keywords` (`keywords`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 				);
 				
 				Symphony::Database()->query(
@@ -53,7 +53,7 @@
 					  `keyword` varchar(255) default NULL,
 					  PRIMARY KEY  (`id`),
 					  FULLTEXT KEY `keyword` (`keyword`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 				);
 				
 				Symphony::Database()->query(
@@ -63,7 +63,7 @@
 					  `frequency` int(11) default NULL,
 					  KEY `entry_id` (`entry_id`),
 					  KEY `keyword_id` (`keyword_id`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 				);
 				
 			}
@@ -139,7 +139,7 @@
 		*/
 		public function uninstall(){
 			
-			Symphony::Configuration()->remove('search_index');			
+			Symphony::Configuration()->remove('search_index');
 			Symphony::Configuration()->write();
 			
 			try{
@@ -301,7 +301,7 @@
 					$table->setAttribute('class', 'skinny');
 
 					$context['panel']->appendChild($table);
-					$context['panel']->appendChild(new XMLElement('p', '<a href="'.(URL . '/symphony/extension/search_index/logs/').'">' . __('View full search logs') . ' &#8594;</a>', array('style' => 'margin:0.7em;text-align:right;')));
+					$context['panel']->appendChild(new XMLElement('p', '<a href="'.(SYMPHONY_URL . '/extension/search_index/logs/').'">' . __('View full search logs') . ' &#8594;</a>', array('style' => 'margin:0.7em;text-align:right;')));
 					
 				break;
 
