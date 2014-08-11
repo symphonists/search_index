@@ -100,7 +100,7 @@ Class SearchIndex {
 
 						if($field_id == 'id') $where = " AND `e`.id IN ('".@implode("', '", $value)."') ";
 						else{ 
-							if(!$fieldPool[$field_id]->buildDSRetrivalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false))){ $this->_force_empty_result = true; return; }
+							if(!$fieldPool[$field_id]->buildDSRetrievalSQL($value, $joins, $where, ($filter_type == DS_FILTER_AND ? true : false))){ $this->_force_empty_result = true; return; }
 							if(!$group) $group = $fieldPool[$field_id]->requiresSQLGrouping();
 						}
 											
@@ -757,8 +757,5 @@ Class SearchIndex {
 		}
 		return true;
 	} 
-  
-	
-	
-	
+
 }
