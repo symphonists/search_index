@@ -2,7 +2,7 @@
 	
 	require_once(EXTENSIONS . '/search_index/lib/class.search_index.php');
 	
-	Class fieldSearch_Index extends Field{	
+	Class fieldSearch_Index extends Field {
 		
 		private $keywords_highlight = '';
 		
@@ -12,7 +12,7 @@
 		function __construct(){
 			parent::__construct();
 			$this->_name = __('Search Index');
-			$this->_required = FALSE;			
+			$this->_required = FALSE;
 			$this->set('hide', 'no');
 		}
 		
@@ -24,10 +24,26 @@
 		}
 		
 		/**
+		* Create table to hold field instance's values
+		*/
+		public function createTable(){
+			return Symphony::Database()->query(
+				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
+				  `id` int(11) unsigned NOT NULL auto_increment,
+				  `entry_id` int(11) unsigned NOT NULL,
+				  `value` double default NULL,
+				  PRIMARY KEY  (`id`),
+				  KEY `entry_id` (`entry_id`),
+				  KEY `value` (`value`)
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+			);
+		}
+
+		/**
 		* Process POST data for entry saving
 		*/
-		public function processRawFieldData($data, &$status, $simulate=FALSE, $entry_id=NULL) {	
-			$status = self::__OK__;			
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=NULL){
+			$status = self::__OK__;
 			return array('value' => '');
 		}
 		
@@ -44,10 +60,7 @@
 			$fields = array();
 			$fields['field_id'] = $id;
 			
-			// delete existing field configuration
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
-			// save new field configuration
-			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());
+			return FieldManager::saveSettings($id, $fields);
 		}
 
 		/**
@@ -59,8 +72,8 @@
 		* @param string $fieldnamePrefix
 		* @param string $fieldnamePostfix
 		*/
-		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-			$value = $data['value'];					
+		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $error = null, $prefix = null, $postfix = null, $entry_id = null) {
+			$value = $data['value'];
 			$label = Widget::Label($this->get('label'));
 			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));			
 		}
@@ -108,22 +121,6 @@
 		}
 		
 		/**
-		* Create table to hold field instance's values
-		*/		
-		public function createTable(){
-			return Symphony::Database()->query(			
-				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-				  `id` int(11) unsigned NOT NULL auto_increment,
-				  `entry_id` int(11) unsigned NOT NULL,
-				  `value` double default NULL,
-				  PRIMARY KEY  (`id`),
-				  KEY `entry_id` (`entry_id`),
-				  KEY `value` (`value`)
-				) TYPE=MyISAM;"			
-			);
-		}
-		
-		/**
 		* Build SQL for Data Source filter
 		*
 		* @param array $data
@@ -131,7 +128,7 @@
 		* @param string $where
 		* @param boolean $andOperation
 		*/
-		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=FALSE){
+		function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=FALSE){
 			$field_id = $this->get('id');
 			
 			$joins .= " LEFT JOIN `tbl_search_index` AS search_index ON (e.id = search_index.entry_id) ";
@@ -150,7 +147,7 @@
 			
 			switch($mode) {
 				
-				case 'FULLTEXT':				
+				case 'FULLTEXT':
 					$where .= " AND MATCH(search_index.data) AGAINST ('{$keywords}' IN BOOLEAN MODE) ";
 				break;
 				
@@ -213,5 +210,3 @@
 		}
 						
 	}
-
-?>
