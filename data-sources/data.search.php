@@ -419,10 +419,9 @@
 				
 				// add excerpt with highlighted search terms
 				$excerpt = SearchIndex::parseExcerpt($keywords_highlight, $entry['data']);
-				$excerpt = html_entity_decode($excerpt);
 				$excerpt = $this->fixEncoding($excerpt);
 				$entry_xml->appendChild(new XMLElement('excerpt', $excerpt));
- 
+
 				// build and append entry data
 				if($build_entries) {
 					$e = reset(EntryManager::fetch($entry['entry_id']));
@@ -440,6 +439,7 @@
 			
 			// send entry IDs as Output Parameterss
 			$param_pool['ds-' . $this->dsParamROOTELEMENT . '.id'] = $param_output;
+			$param_pool['ds-' . $this->dsParamROOTELEMENT] = $param_output;
 	
 		// Log query
 		/*-----------------------------------------------------------------------*/
