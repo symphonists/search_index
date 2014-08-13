@@ -119,7 +119,7 @@
 			return TRUE;
 		}
 		
-		public function update($previousVersion){
+		public function update($previousVersion = false){
 			
 			if(version_compare($previousVersion, '0.6', '<')){
 				Symphony::Database()->query("ALTER TABLE `tbl_search_index_logs` ADD `keywords_manipulated` varchar(255) default NULL");

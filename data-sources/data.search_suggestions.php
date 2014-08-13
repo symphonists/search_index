@@ -37,7 +37,7 @@
 			return FALSE;
 		}
 		
-		public function grab(&$param_pool) {
+		public function grab(array &$param_pool = NULL) {
 			
 			$result = new XMLElement($this->dsParamROOTELEMENT);
 			

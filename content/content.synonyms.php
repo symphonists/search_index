@@ -16,7 +16,7 @@
 			$this->_hash = NULL;
 		}
 		
-		public function build($context) {
+		public function build(array $context = array()) {
 			$this->__prepareEdit($context);		
 			parent::build($context);
 		}

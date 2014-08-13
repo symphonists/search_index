@@ -88,7 +88,7 @@
 		* @param string $fieldnamePrefix
 		* @param string $fieldnamePostfix
 		*/
-		public function displayDatasourceFilterPanel(&$wrapper, $data=NULL, $errors=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+		public function displayDatasourceFilterPanel(XMLElement &$wrapper, $data = NULL, $errors = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL){
 			$header = new XMLElement('header');
 			$header->appendChild(new XMLElement('h4', $this->get('label')));
 			$header->appendChild(new XMLElement('span', $this->name()));

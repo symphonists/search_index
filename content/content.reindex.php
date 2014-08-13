@@ -20,7 +20,7 @@
 			$this->_index = null;
 		}
 		
-		public function build($context) {
+		public function build(array $context = array()) {
 			$this->__setContext((int)$_GET['section']);
 			parent::build($context);
 		}
