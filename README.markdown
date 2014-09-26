@@ -25,6 +25,8 @@ Multiple sections can be selected at once for re-indexing.
 
 The page size and speed of refresh can be modified by editing the `re-index-per-page` and `re-index-refresh-rate` variables in your Symphony `config.php`.
 
+The index will be automatically updated whenever an entry within the indexed section is created or edited.
+
 ### 2. Fulltext search in a data source (single section)
 Adding a keyword search to an existing data source is extremely easy. Start by adding the Search Index field to your section. This allows you to add a filter on this field when building a data source. For example:
 
