@@ -1,9 +1,6 @@
 # Search Index
 
-* Version: 0.9.1
-* Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-07-08
-* Requirements: Symphony 2.2
+* Author: [Nick Dunn](http://nick-dunn.co.uk), Nathan Hornby, Brendan Abbott
 
 ## Description
 Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index field that allows keyword filtering in data sources, or the included Search Index data source for searching multiple sections at once.
