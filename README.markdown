@@ -1,9 +1,6 @@
 # Search Index
 
-* Version: 0.9.1
-* Author: [Nick Dunn](http://nick-dunn.co.uk)
-* Build Date: 2011-07-08
-* Requirements: Symphony 2.2
+* Author: [Nick Dunn](https://github.com/nickdunn), [Nathan Hornby](https://github.com/nathanhornby), [Brendan Abbott](https://github.com/brendo)
 
 ## Description
 Search Index provides an easy way to implement high performance fulltext searching on your Symphony site. By setting filters for each Section in your site you control which entries are indexed and therefore searchable. Frontend search can be implemented either using the Search Index field that allows keyword filtering in data sources, or the included Search Index data source for searching multiple sections at once.
@@ -24,8 +21,6 @@ Once saved the "Index" column will display "0 entries" on the Search Indexes pag
 Multiple sections can be selected at once for re-indexing.
 
 The page size and speed of refresh can be modified by editing the `re-index-per-page` and `re-index-refresh-rate` variables in your Symphony `config.php`.
-
-The index will be automatically updated whenever an entry within the indexed section is created, edited or deleted.
 
 ### 2. Fulltext search in a data source (single section)
 Adding a keyword search to an existing data source is extremely easy. Start by adding the Search Index field to your section. This allows you to add a filter on this field when building a data source. For example:
