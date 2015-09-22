@@ -16,6 +16,10 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="0.9.4" date="2015-09-22" min="2.4">
+			- [#53](https://github.com/symphonists/search_index/issues/53) Fix tagging issues
+			- [#47](https://github.com/symphonists/search_index/issues/47) Fix reference to old filter function
+		</release>
 		<release version="0.9.3" date="2014-06-22" min="2.4" />
 		<release version="0.9.2" date="2012-07-21" min="2.3" max="2.3.6"/>
 		<release version="0.9.1" date="2011-07-08" min="2.2.5" max="2.2.5"/>
