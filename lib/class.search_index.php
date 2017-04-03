@@ -207,8 +207,16 @@ Class SearchIndex {
 			$data = utf8_encode($data);
 		}
 
-		$data = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $data);
-	    $data = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $data);
+    $data = preg_replace_callback('~&#x([0-9a-f]+);~i', 
+      function($m) { return chr(hexdec($m[1])); },
+      $data
+		);
+		
+	  $data = preg_replace_callback('~&#([0-9]+);~', 
+      function($m) { return chr($m[1]); },
+      $data
+    );
+	  
 		$data = strip_punctuation($data);
 		
 		$words = explode(' ', trim($data));
