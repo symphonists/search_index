@@ -50,12 +50,12 @@
 			
 			$sort = '`frequency` DESC';
 			
-// 			$sort = (string)$_GET['sort'];
-// 			if($sort == '' || $sort == 'alphabetical') {
-// 				$sort = '`keywords`.`keyword` ASC';
-// 			} elseif($sort == 'frequency') {
-// 				$sort = '`frequency` DESC';
-// 			}
+			$sort = (string)$_GET['sort'];
+			if($sort == '' || $sort == 'alphabetical') {
+				$sort = '`keywords`.`keyword` ASC';
+			} elseif($sort == 'frequency') {
+				$sort = '`frequency` DESC';
+			}
 			
 			if(strlen($keywords) <= 2) return $result;
 					
