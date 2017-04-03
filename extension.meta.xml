@@ -18,6 +18,7 @@
 	<releases>
 		<release version="0.9.5" date="2017-04-03" min="2.4" max="2.x.x">
 			- Replaced deprecated preg_replace /e in lib/class.search_index.php
+			- Add URL decoding for data.search_suggestions.php DS
 		</release>
 		<release version="0.9.4" date="2015-09-22" min="2.4">
 			- [#53](https://github.com/symphonists/search_index/issues/53) Fix tagging issues
