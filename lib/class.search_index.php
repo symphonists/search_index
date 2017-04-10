@@ -325,34 +325,6 @@ Class SearchIndex {
 	*
 	* @param string $string
 	*/
-	public function manipulateKeywords($string) {
-		
-		// replace spaces within quoted phrases
-		$string = preg_replace('/"(?:[^\\"]+|\\.)*"/e', "str_replace(' ', 'SEARCH_INDEX_SPACE', '$0')", $string);
-		// correct slashed quotes sa a result of above
-		$string = stripslashes(trim($string));
-		
-		$keywords = '';
-		
-		// get each word
-		foreach(explode(' ', $string) as $word) {
-			if (!preg_match('/^(\-|\+)/', $word) && !preg_match('/^"/', $word)) {
-				if (Symphony::Configuration()->get('append-all-words-required', 'search_index') == 'yes') {
-					$word = '+' . $word;
-				}
-				if (!preg_match('/\*$/', $word) && Symphony::Configuration()->get('append-wildcard', 'search_index') == 'yes') {
-					$word = $word . '*';
-				}
-			}
-			$keywords .= $word . ' ';
-		}
-		
-		$keywords = trim($keywords);
-		$keywords = preg_replace('/SEARCH_INDEX_SPACE/', ' ', $keywords);
-		
-		return $keywords;
-	}
-	
 	public static function parseExcerpt($keywords, $text) {
 	
 		$text = trim($text);
